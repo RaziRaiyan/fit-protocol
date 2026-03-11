@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { formatDate } from '../utils';
+import { formatDate, computeResetDay } from '../utils';
 
 export default function Header({ appState }) {
   const [date, setDate] = useState(formatDate());
@@ -14,7 +14,7 @@ export default function Header({ appState }) {
     : appState.streak;
 
   const RESET_DAY_LABELS = ['Tonight', 'Day 1 of 4', 'Day 2 of 4', 'Day 3 of 4', 'Day 4 of 4'];
-  const resetDayLabel = RESET_DAY_LABELS[Math.min(appState.sleepResetDay || 0, 4)];
+  const resetDayLabel = RESET_DAY_LABELS[computeResetDay(appState.sleepResetStartDate)];
 
   return (
     <header className="header">

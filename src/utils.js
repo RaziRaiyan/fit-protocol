@@ -33,6 +33,14 @@ export function getTodayDayIdx() {
   return new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
 }
 
+export function computeResetDay(startDateStr) {
+  if (!startDateStr) return 0;
+  const start = new Date(startDateStr);
+  const today = new Date(new Date().toISOString().split('T')[0]);
+  const days = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+  return Math.min(Math.max(days, 0), 4);
+}
+
 export function formatDate() {
   const d = new Date();
   const opts = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' };

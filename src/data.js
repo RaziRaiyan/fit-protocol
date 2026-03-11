@@ -202,48 +202,99 @@ export const SLEEP_STEPS = [
     id: "ss1",
     title: "Wake Up Early — No Matter What",
     desc: "Even if you slept at 1–2 AM, wake at 6:30–7 AM tomorrow. This builds sleep pressure for the next night.",
-    detail: "→ Set an alarm tonight for 6:30 AM\n→ Do NOT snooze or go back to sleep\n→ Getting up tired is the whole point — it resets your pressure system\n→ This is the single most important step"
+    detail: "→ Set an alarm tonight for 6:30 AM\n→ Do NOT snooze or go back to sleep\n→ Getting up tired is the whole point — it resets your pressure system\n→ This is the single most important step",
+    tonight: {
+      title: "Set Your 6:30 AM Alarm Right Now",
+      desc: "You already woke up late today — that's fine. The reset starts tomorrow morning. The most impactful thing you can do right now is commit to the alarm.",
+      detail: "→ Set your alarm for 6:30–7:00 AM before you do anything else\n→ Put the phone across the room if you tend to snooze\n→ Tomorrow's wake time is the single lever that resets everything\n→ You can't fix tonight — but you can control tomorrow morning"
+    }
   },
   {
     id: "ss2",
     title: "Get Morning Sunlight Immediately",
     desc: "Within 30 minutes of waking, get outside. Sunlight tells your brain 'it's daytime' and resets the internal clock.",
-    detail: "→ 10–15 minutes outdoors is enough\n→ Don't wear sunglasses during this time\n→ Even on cloudy days, outdoor light is 10–100× brighter than indoor\n→ This is the most powerful circadian signal your body has"
+    detail: "→ 10–15 minutes outdoors is enough\n→ Don't wear sunglasses during this time\n→ Even on cloudy days, outdoor light is 10–100× brighter than indoor\n→ This is the most powerful circadian signal your body has",
+    tonight: {
+      title: "Get Outside Now If There's Any Daylight Left",
+      desc: "Afternoon or evening sunlight still helps anchor your rhythm. Even if it's late, a short walk outside is better than none.",
+      detail: "→ Go outside for 10–15 minutes if there's still natural light\n→ Don't wear sunglasses\n→ This won't fix tonight but it starts signalling your clock\n→ Tomorrow morning: be outside within 30 min of waking — that's the critical window"
+    }
   },
   {
     id: "ss3",
     title: "Exercise Early (You Already Have This!)",
     desc: "Your 6 AM gym plan actually accelerates the reset. Morning exercise shifts circadian rhythm earlier and improves sleep quality.",
-    detail: "→ Gym at 6 AM = circadian reset + sleep pressure build-up\n→ Even a 20-min walk counts on low-energy days\n→ Avoid intense evening exercise during the reset period\n→ Your protocol is already built for this"
+    detail: "→ Gym at 6 AM = circadian reset + sleep pressure build-up\n→ Even a 20-min walk counts on low-energy days\n→ Avoid intense evening exercise during the reset period\n→ Your protocol is already built for this",
+    tonight: {
+      title: "No Intense Exercise Tonight",
+      desc: "Evening exercise raises core temperature and cortisol, which delays sleep onset. Tonight, keep movement light. Resume early morning training from tomorrow.",
+      detail: "→ Avoid gym, running, or intense training tonight\n→ A slow 15-min walk is fine and may help\n→ From tomorrow: get back to early morning exercise\n→ Morning training is one of the strongest circadian reset signals"
+    }
   },
   {
     id: "ss4",
     title: "No Caffeine After 1 PM",
     desc: "Caffeine has a 6–8 hour half-life. Coffee at 3 PM = half active at 9–11 PM. This directly delays your sleep onset.",
-    detail: "→ Coffee and black tea: morning only\n→ Green tea also has caffeine — limit after noon\n→ No pre-workout supplements in the evening\n→ This one rule alone can shift sleep by 1–2 hours"
+    detail: "→ Coffee and black tea: morning only\n→ Green tea also has caffeine — limit after noon\n→ No pre-workout supplements in the evening\n→ This one rule alone can shift sleep by 1–2 hours",
+    tonight: {
+      title: "No More Caffeine Today — Stop Right Now",
+      desc: "It's likely already past the 1 PM cutoff. Any caffeine from here delays tonight's sleep further. Cut it completely for the rest of today.",
+      detail: "→ No coffee, tea, energy drinks, or pre-workout from now\n→ Caffeine's half-life is 6–8 hours — it's still active hours after you drink it\n→ Even if you feel fine, it's suppressing your sleep drive\n→ From tomorrow: caffeine only before 1 PM"
+    }
   },
   {
     id: "ss5",
     title: "Control Evening Light After 9 PM",
     desc: "Artificial blue light suppresses melatonin production. This is the #1 cause of modern sleep delay.",
-    detail: "→ Dim all house lights after 9 PM\n→ Enable Night Mode / warm display on phone\n→ Avoid bright laptop screens if possible\n→ Candles or lamp light is ideal\n→ Blue light blocking glasses can help if you must use screens"
+    detail: "→ Dim all house lights after 9 PM\n→ Enable Night Mode / warm display on phone\n→ Avoid bright laptop screens if possible\n→ Candles or lamp light is ideal\n→ Blue light blocking glasses can help if you must use screens",
+    tonight: {
+      title: "Dim All Lights Starting Now — Earlier Than Usual",
+      desc: "Tonight, start dimming at 8 PM instead of 9 PM. Since your melatonin is already delayed, you need an earlier and stronger signal.",
+      detail: "→ Dim all house lights from 8 PM tonight\n→ Enable Night Mode / warm display on all screens immediately\n→ No bright overhead lights — use lamps only\n→ Blue light blocking glasses if you must use screens\n→ The darker the environment, the faster melatonin rises"
+    }
   },
   {
     id: "ss6",
     title: "Wind-Down Routine at 9:30 PM",
     desc: "Signal your brain that sleep is approaching. This is non-negotiable during the reset period.",
-    detail: "→ 9:30 PM: Light stretching (5–10 min)\n→ Warm shower — the temperature drop afterward promotes sleep\n→ Reading (physical book or e-ink, not phone)\n→ Calm music or nothing\n→ Keep the same wind-down cue every night — your brain learns it"
+    detail: "→ 9:30 PM: Light stretching (5–10 min)\n→ Warm shower — the temperature drop afterward promotes sleep\n→ Reading (physical book or e-ink, not phone)\n→ Calm music or nothing\n→ Keep the same wind-down cue every night — your brain learns it",
+    tonight: {
+      title: "Start Wind-Down at 9 PM Tonight",
+      desc: "Begin earlier than usual tonight. You're not forcing sleep — you're removing everything that's blocking it.",
+      detail: "→ 9:00 PM: Warm shower (the temperature drop afterward triggers sleepiness)\n→ Light stretching or breathing exercises\n→ Read a physical book or something calm — no social media\n→ Don't lie in bed watching a clock — only go to bed when genuinely sleepy\n→ Tonight may still be a late sleep — that's expected and okay"
+    }
   },
   {
     id: "ss7",
     title: "If You Can't Sleep — Get Up",
     desc: "Don't lie in bed frustrated. After 20 minutes of lying awake, get up. This prevents your brain associating bed with wakefulness.",
-    detail: "→ Don't check the time repeatedly\n→ Get up, go to another dim room\n→ Read something calm — nothing stimulating\n→ No phone, no email\n→ Return only when you feel genuinely sleepy\n→ This is called Stimulus Control Therapy and it works"
+    detail: "→ Don't check the time repeatedly\n→ Get up, go to another dim room\n→ Read something calm — nothing stimulating\n→ No phone, no email\n→ Return only when you feel genuinely sleepy\n→ This is called Stimulus Control Therapy and it works",
+    tonight: {
+      title: "Don't Force Sleep — Get Up If You're Lying Awake",
+      desc: "Tonight your body may not be ready to sleep early. Don't fight it by lying in bed frustrated — that makes it worse.",
+      detail: "→ Only go to bed when you feel genuinely sleepy\n→ If you lie awake for 20+ minutes, get up\n→ Go to a dim room, read something calm\n→ No phone scrolling — it will reset your alertness\n→ Return to bed only when sleepy\n→ Even a late sleep tonight is fine — tomorrow's wake time is what matters"
+    }
   },
   {
     id: "ss8",
     title: "Optional: Magnesium Glycinate",
     desc: "Magnesium helps muscle relaxation and nervous system calm. It can meaningfully improve sleep quality during the reset.",
-    detail: "→ Dose: 200–400 mg Magnesium Glycinate\n→ Take 30–60 minutes before bed\n→ Glycinate form is best absorbed with fewest side effects\n→ Not a sleeping pill — it supports natural relaxation\n→ Available at most pharmacies and online"
+    detail: "→ Dose: 200–400 mg Magnesium Glycinate\n→ Take 30–60 minutes before bed\n→ Glycinate form is best absorbed with fewest side effects\n→ Not a sleeping pill — it supports natural relaxation\n→ Available at most pharmacies and online",
+    tonight: {
+      title: "Optional: Magnesium Glycinate Tonight",
+      desc: "Magnesium Glycinate can help calm your nervous system tonight. Not a sleeping pill — it just removes a common barrier to relaxation.",
+      detail: "→ Dose: 200–400 mg Magnesium Glycinate\n→ Take 30–60 minutes before you plan to sleep\n→ Glycinate form is best absorbed with fewest side effects\n→ Don't expect it to knock you out — it reduces physical tension\n→ Available at most pharmacies and online"
+    }
   },
+];
+
+export const DAILY_HABITS = [
+  { id: 'dh1', label: 'Woke up at target time', detail: '5:15 AM on weekdays · 7 AM on weekends' },
+  { id: 'dh2', label: 'Got morning sunlight', detail: 'Outside within 30 min of waking, 10–15 min' },
+  { id: 'dh3', label: 'Completed morning workout', detail: '6 AM gym session or equivalent training' },
+  { id: 'dh4', label: 'No caffeine after 1 PM', detail: 'No coffee, tea, energy drinks, or pre-workout' },
+  { id: 'dh5', label: 'Followed meal plan', detail: 'Hit macro targets and meal timing for the day' },
+  { id: 'dh6', label: 'Dimmed lights after 9 PM', detail: 'Night mode on, overhead lights off, lamps only' },
+  { id: 'dh7', label: 'Completed wind-down routine', detail: 'Stretching, shower, calm activity by 9:30 PM' },
+  { id: 'dh8', label: 'In bed by target time', detail: '10 PM on weekdays · 11 PM on weekends' },
 ];

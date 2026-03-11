@@ -1,4 +1,4 @@
-import { todayStr } from '../utils';
+import { computeResetDay } from '../utils';
 
 export default function SleepResetBanner({ appState, setAppState, onNavigate }) {
   if (!appState.sleepResetActive) return null;
@@ -11,11 +11,7 @@ export default function SleepResetBanner({ appState, setAppState, onNavigate }) 
   };
 
   const dayLabels = ['Tonight', 'Day 1', 'Day 2', 'Day 3', 'Day 4 ✓'];
-  const currentDay = appState.sleepResetDay || 0;
-
-  function advanceResetDay(i) {
-    setAppState(prev => ({ ...prev, sleepResetDay: Math.max(prev.sleepResetDay || 0, i) }));
-  }
+  const currentDay = computeResetDay(appState.sleepResetStartDate);
 
   function exitSleepReset() {
     setAppState(prev => ({
@@ -45,8 +41,6 @@ export default function SleepResetBanner({ appState, setAppState, onNavigate }) 
           <button
             key={i}
             className={`srb-day-pill${i === currentDay ? ' active' : ''}${i < currentDay ? ' done' : ''}`}
-            onClick={i <= currentDay + 1 && i > currentDay ? () => advanceResetDay(i) : undefined}
-            title={i <= currentDay + 1 && i > currentDay ? 'Mark this day done' : undefined}
           >
             {label}
           </button>

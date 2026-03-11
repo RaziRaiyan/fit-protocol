@@ -9,6 +9,7 @@ import WorkoutTab from './components/WorkoutTab';
 import TasksTab from './components/TasksTab';
 import GroceryTab from './components/GroceryTab';
 import SleepResetTab from './components/SleepResetTab';
+import DailyReviewTab from './components/DailyReviewTab';
 
 const INITIAL_STATE = {
   timelineChecks: {},
@@ -25,6 +26,7 @@ const INITIAL_STATE = {
   sleepResetReason: null,
   sleepStepChecks: {},
   sleepLogs: [],
+  dailyHabitChecks: {},
 };
 
 const TABS = [
@@ -34,6 +36,7 @@ const TABS = [
   { id: 'tasks', label: '✅ Weekly Tasks' },
   { id: 'grocery', label: '🛒 Grocery' },
   { id: 'sleep', label: '🌙 Sleep Reset' },
+  { id: 'review', label: '📊 Daily Review' },
 ];
 
 export default function App() {
@@ -112,6 +115,9 @@ export default function App() {
       )}
       {activeTab === 'sleep' && (
         <SleepResetTab appState={appState} setAppState={setAppState} />
+      )}
+      {activeTab === 'review' && (
+        <DailyReviewTab appState={appState} setAppState={setAppState} />
       )}
     </>
   );

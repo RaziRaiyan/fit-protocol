@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SLEEP_STEPS } from '../data';
-import { todayStr } from '../utils';
+import { todayStr, computeResetDay } from '../utils';
 
 function CheckSvg({ color = '#fff' }) {
   return (
@@ -24,8 +24,17 @@ export default function SleepResetTab({ appState, setAppState }) {
   const [wakeTime, setWakeTime] = useState('07:00');
 
   const isActive = appState.sleepResetActive;
-  const currentDay = appState.sleepResetDay || 0;
+  const currentDay = computeResetDay(appState.sleepResetStartDate);
   const dateKey = appState.sleepResetStartDate || todayStr();
+
+  const todayLog = (appState.sleepLogs || []).find(l => l.date === todayStr());
+
+  useEffect(() => {
+    if (todayLog) {
+      setSleepTime(todayLog.sleep);
+      setWakeTime(todayLog.wake);
+    }
+  }, [todayLog?.sleep, todayLog?.wake]);
 
   function toggleSleepReset() {
     if (isActive) {
@@ -71,12 +80,15 @@ export default function SleepResetTab({ appState, setAppState }) {
 
   function logSleepEntry() {
     if (!sleepTime || !wakeTime) return;
+    const today = todayStr();
     setAppState(prev => {
-      const currentDay = prev.sleepResetDay || 0;
+      const logs = prev.sleepLogs || [];
+      const exists = logs.some(l => l.date === today);
       return {
         ...prev,
-        sleepLogs: [...(prev.sleepLogs || []), { date: todayStr(), sleep: sleepTime, wake: wakeTime }],
-        sleepResetDay: currentDay < 4 ? currentDay + 1 : currentDay,
+        sleepLogs: exists
+          ? logs.map(l => l.date === today ? { ...l, sleep: sleepTime, wake: wakeTime } : l)
+          : [...logs, { date: today, sleep: sleepTime, wake: wakeTime }],
       };
     });
   }
@@ -181,7 +193,7 @@ export default function SleepResetTab({ appState, setAppState }) {
                 <span style={{ fontFamily: "'Space Mono',monospace", fontSize: '0.6rem', color: '#a78bfa' }}>(THIS MORNING)</span>
               </div>
               <input type="time" className="sleep-time-input" value={wakeTime} onChange={e => setWakeTime(e.target.value)} />
-              <button className="sleep-log-btn" onClick={logSleepEntry}>LOG ENTRY</button>
+              <button className="sleep-log-btn" onClick={logSleepEntry}>{todayLog ? 'UPDATE ENTRY' : 'LOG ENTRY'}</button>
             </div>
             {(appState.sleepLogs || []).length > 0 && (
               <div style={{ marginTop: '0.5rem' }}>
@@ -202,13 +214,16 @@ export default function SleepResetTab({ appState, setAppState }) {
           THE 8-STEP RESET PROTOCOL
         </div>
         <div style={{ fontSize: '0.78rem', color: 'var(--muted)', fontFamily: "'Space Mono',monospace", marginBottom: '1.5rem' }}>
-          TAP A STEP TO EXPAND DETAILS • CHECK OFF AS YOU COMPLETE EACH DAY
+          {isActive && currentDay === 0
+            ? 'TONIGHT\'S STEPS — ADAPTED FOR YOUR FIRST NIGHT • TAP TO EXPAND'
+            : 'TAP A STEP TO EXPAND DETAILS • CHECK OFF AS YOU COMPLETE EACH DAY'}
         </div>
 
         {SLEEP_STEPS.map((step, idx) => {
           const key = `${dateKey}_${step.id}`;
           const done = !!(appState.sleepStepChecks && appState.sleepStepChecks[key]);
           const isExpanded = expandedStep === idx;
+          const variant = (isActive && currentDay === 0 && step.tonight) ? step.tonight : step;
 
           return (
             <div
@@ -217,10 +232,10 @@ export default function SleepResetTab({ appState, setAppState }) {
             >
               <div className="step-number">{idx + 1}</div>
               <div className="step-content" onClick={() => setExpandedStep(isExpanded ? null : idx)}>
-                <div className="step-title">{step.title}</div>
-                <div className="step-desc">{step.desc}</div>
+                <div className="step-title">{variant.title}</div>
+                <div className="step-desc">{variant.desc}</div>
                 <div className="step-detail">
-                  {step.detail.split('\n').map((line, i) => (
+                  {variant.detail.split('\n').map((line, i) => (
                     <span key={i}>{line}<br /></span>
                   ))}
                 </div>

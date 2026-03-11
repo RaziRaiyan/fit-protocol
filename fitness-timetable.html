@@ -1,0 +1,2342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIT PROTOCOL — Daily Timetable</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #181818;
+    --border: #252525;
+    --accent: #c8f135;
+    --accent2: #f1a035;
+    --accent3: #35c8f1;
+    --text: #e8e8e8;
+    --muted: #666;
+    --danger: #f14c35;
+    --success: #35f18a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,10,0.95);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+  }
+
+  .logo span { color: var(--text); }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .streak-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.4rem 0.9rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+  }
+
+  .streak-flame { font-size: 1.1rem; }
+
+  .streak-count {
+    color: var(--accent2);
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  .date-display {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    overflow-x: auto;
+  }
+
+  .tab {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 1rem 1.5rem;
+    border: none;
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* LAYOUT */
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* SECTION HEADING */
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.2rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.3rem;
+  }
+
+  .section-sub {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 2rem;
+  }
+
+  /* PROGRESS BAR */
+  .day-progress {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .progress-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+
+  .progress-bar-wrap {
+    flex: 1;
+    background: var(--border);
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+
+  .progress-pct {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  /* TIME BLOCKS */
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 5.5rem;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .time-block {
+    display: grid;
+    grid-template-columns: 5rem 1.5rem 1fr;
+    gap: 0 1rem;
+    align-items: start;
+    position: relative;
+    padding-bottom: 0.2rem;
+  }
+
+  .time-block.completed .block-card {
+    opacity: 0.5;
+  }
+
+  .time-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    text-align: right;
+    padding-top: 1.15rem;
+    letter-spacing: 0.05em;
+  }
+
+  .time-dot-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 1.2rem;
+  }
+
+  .time-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+    border: 2px solid var(--border);
+    transition: all 0.3s;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .time-block.completed .time-dot {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  .time-block.active-now .time-dot {
+    background: var(--accent2);
+    border-color: var(--accent2);
+    box-shadow: 0 0 12px var(--accent2);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 8px var(--accent2); }
+    50% { box-shadow: 0 0 20px var(--accent2); }
+  }
+
+  .block-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.9rem 1.1rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .block-card:hover {
+    border-color: #333;
+    background: var(--surface2);
+  }
+
+  .time-block.active-now .block-card {
+    border-color: rgba(241, 160, 53, 0.3);
+  }
+
+  .block-card.checked {
+    border-color: rgba(200, 241, 53, 0.2);
+  }
+
+  .block-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+  }
+
+  .cat-workout .block-card::before { background: var(--accent); }
+  .cat-meal .block-card::before { background: var(--accent2); }
+  .cat-work .block-card::before { background: var(--accent3); }
+  .cat-sleep .block-card::before { background: #7c3aed; }
+  .cat-routine .block-card::before { background: var(--muted); }
+  .cat-walk .block-card::before { background: var(--success); }
+
+  .block-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .block-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .block-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    padding: 0.15rem 0.45rem;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    flex-shrink: 0;
+  }
+
+  .cat-workout .block-tag { background: rgba(200,241,53,0.1); color: var(--accent); }
+  .cat-meal .block-tag { background: rgba(241,160,53,0.1); color: var(--accent2); }
+  .cat-work .block-tag { background: rgba(53,200,241,0.1); color: var(--accent3); }
+  .cat-sleep .block-tag { background: rgba(124,58,237,0.1); color: #a78bfa; }
+  .cat-routine .block-tag { background: rgba(102,102,102,0.15); color: var(--muted); }
+  .cat-walk .block-tag { background: rgba(53,241,138,0.1); color: var(--success); }
+
+  .block-desc {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
+    line-height: 1.5;
+  }
+
+  .checkbox-custom {
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 3px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+
+  .checkbox-custom.checked {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .checkbox-custom svg {
+    display: none;
+  }
+
+  .checkbox-custom.checked svg {
+    display: block;
+  }
+
+  /* DAY SELECTOR */
+  .day-selector {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .day-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .day-btn:hover { color: var(--text); border-color: #333; }
+  .day-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; }
+  .day-btn.completed-day { border-color: rgba(200,241,53,0.3); color: rgba(200,241,53,0.6); }
+
+  /* WEEKLY / BIWEEKLY TRACKER */
+  .tracker-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  @media (max-width: 700px) { .tracker-grid { grid-template-columns: 1fr; } }
+
+  .tracker-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+
+  .tracker-card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.3rem;
+  }
+
+  .tracker-card-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1.2rem;
+  }
+
+  .tracker-item {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .tracker-item:last-child { border-bottom: none; }
+  .tracker-item:hover { opacity: 0.8; }
+
+  .tracker-item-info { flex: 1; }
+
+  .tracker-item-name {
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .tracker-item-desc {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 0.15rem;
+  }
+
+  .tracker-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    flex-shrink: 0;
+  }
+
+  .tracker-dot.done {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .last-done {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+  }
+
+  /* WORKOUT TRACKER */
+  .workout-week {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .workout-days {
+    display: flex;
+    gap: 0.7rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .workout-day-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .wd-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .wd-circle {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    line-height: 1.2;
+    padding: 2px;
+  }
+
+  .wd-circle:hover { border-color: #444; }
+  .wd-circle.done { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 700; }
+  .wd-circle.rest { background: var(--surface2); color: var(--muted); cursor: default; font-style: italic; }
+
+  /* STATS PANEL */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  @media (max-width: 700px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+
+  .stat-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.1rem;
+  }
+
+  .stat-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 0.05em;
+    line-height: 1;
+  }
+
+  .stat-unit {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+  }
+
+  /* MEALS TAB */
+  .meal-day-nav {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .meal-plan-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  @media (max-width: 700px) { .meal-plan-grid { grid-template-columns: 1fr; } }
+
+  .meal-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.1rem;
+  }
+
+  .meal-card-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent2);
+    margin-bottom: 0.5rem;
+  }
+
+  .meal-desc { font-size: 0.85rem; margin-bottom: 0.7rem; }
+
+  .macro-row {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+  }
+
+  .macro-chip {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+  }
+
+  .macro-chip.p { color: var(--accent); }
+  .macro-chip.c { color: var(--accent3); }
+  .macro-chip.f { color: var(--accent2); }
+  .macro-chip.cal { color: var(--text); }
+
+  .day-total-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.1rem 1.5rem;
+    display: flex;
+    gap: 2rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .total-item { text-align: center; }
+  .total-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    color: var(--accent);
+  }
+
+  .total-lab {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  /* WORKOUT TAB */
+  .workout-plan-day {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .wp-day-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .wp-focus-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 3px;
+    background: rgba(200,241,53,0.1);
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .exercise-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .exercise-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.6rem 0.8rem;
+    background: var(--surface2);
+    border-radius: 4px;
+    font-size: 0.82rem;
+  }
+
+  .ex-name { flex: 1; font-weight: 500; }
+  .ex-sets {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* TABS PANELS */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* GROCERY LIST */
+  .grocery-section { margin-bottom: 1.5rem; }
+  .grocery-section-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .grocery-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.6rem 0;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .grocery-item.checked-item { opacity: 0.4; }
+  .grocery-item-name { font-size: 0.85rem; }
+  .grocery-item-qty {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  /* ===== SLEEP RESET MODE ===== */
+
+  .sleep-reset-banner {
+    display: none;
+    background: linear-gradient(135deg, rgba(124,58,237,0.15) 0%, rgba(79,37,153,0.08) 100%);
+    border-bottom: 2px solid rgba(124,58,237,0.5);
+    padding: 0.9rem 2rem;
+    align-items: center;
+    gap: 1.5rem;
+    position: relative;
+  }
+
+  .sleep-reset-banner.visible { display: flex; }
+
+  .srb-icon { font-size: 1.5rem; flex-shrink: 0; }
+
+  .srb-text { flex: 1; }
+  .srb-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.08em;
+    color: #a78bfa;
+  }
+  .srb-sub {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    margin-top: 0.1rem;
+  }
+
+  .srb-day-pills { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+
+  .srb-day-pill {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 3px;
+    border: 1px solid rgba(124,58,237,0.3);
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .srb-day-pill.active { background: rgba(124,58,237,0.2); color: #c4b5fd; border-color: rgba(124,58,237,0.6); }
+  .srb-day-pill.done { background: rgba(124,58,237,0.35); color: #a78bfa; border-color: #7c3aed; }
+
+  .srb-exit-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 4px;
+    border: 1px solid rgba(124,58,237,0.4);
+    background: none;
+    color: #a78bfa;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .srb-exit-btn:hover { background: rgba(124,58,237,0.2); }
+
+  /* Sleep reset tab */
+  .sleep-trigger-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    padding: 0.7rem 1.4rem;
+    border-radius: 5px;
+    border: 1.5px solid rgba(124,58,237,0.5);
+    background: rgba(124,58,237,0.08);
+    color: #c4b5fd;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .sleep-trigger-btn:hover { background: rgba(124,58,237,0.18); border-color: rgba(124,58,237,0.8); }
+  .sleep-trigger-btn.active-mode {
+    background: rgba(124,58,237,0.25);
+    border-color: #7c3aed;
+    color: #a78bfa;
+  }
+
+  .sleep-step-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.3rem 1.5rem;
+    margin-bottom: 0.8rem;
+    display: flex;
+    gap: 1.2rem;
+    align-items: flex-start;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .sleep-step-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: rgba(124,58,237,0.4);
+  }
+
+  .sleep-step-card.step-done::before { background: #7c3aed; }
+  .sleep-step-card.step-done { opacity: 0.6; }
+  .sleep-step-card:hover { border-color: rgba(124,58,237,0.3); }
+
+  .step-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    color: rgba(124,58,237,0.4);
+    line-height: 1;
+    flex-shrink: 0;
+    width: 2rem;
+    text-align: center;
+  }
+
+  .sleep-step-card.step-done .step-number { color: #7c3aed; }
+
+  .step-content { flex: 1; }
+
+  .step-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    color: var(--text);
+  }
+
+  .step-desc {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .step-detail {
+    margin-top: 0.5rem;
+    padding: 0.6rem 0.8rem;
+    background: var(--surface2);
+    border-radius: 4px;
+    font-size: 0.75rem;
+    color: #c4b5fd;
+    font-family: 'Space Mono', monospace;
+    line-height: 1.6;
+    display: none;
+  }
+
+  .sleep-step-card.expanded .step-detail { display: block; }
+
+  .step-check {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(124,58,237,0.4);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    margin-top: 0.1rem;
+  }
+
+  .sleep-step-card.step-done .step-check {
+    background: #7c3aed;
+    border-color: #7c3aed;
+  }
+
+  /* Sleep reset timeline */
+  .reset-timeline {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .reset-day-row {
+    display: grid;
+    grid-template-columns: 6rem 1fr auto;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .reset-day-row:last-child { border-bottom: none; }
+
+  .rdr-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .rdr-content { font-size: 0.82rem; }
+  .rdr-sleep { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: #a78bfa; margin-top: 0.2rem; }
+
+  .rdr-status {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .rdr-status.pending { background: rgba(102,102,102,0.15); color: var(--muted); }
+  .rdr-status.today { background: rgba(241,160,53,0.15); color: var(--accent2); }
+  .rdr-status.done { background: rgba(124,58,237,0.2); color: #a78bfa; }
+
+  .streak-protected {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    color: #a78bfa;
+    background: rgba(124,58,237,0.12);
+    border: 1px solid rgba(124,58,237,0.3);
+    border-radius: 3px;
+    padding: 0.2rem 0.6rem;
+  }
+
+  .mode-indicator {
+    display: none;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    background: rgba(124,58,237,0.2);
+    color: #a78bfa;
+    border: 1px solid rgba(124,58,237,0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-left: 0.5rem;
+  }
+
+  .mode-indicator.visible { display: inline-block; }
+
+  /* Sleep log input */
+  .sleep-log-row {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+    padding: 0.8rem;
+    background: var(--surface2);
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .sleep-log-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+
+  .sleep-time-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    padding: 0.35rem 0.7rem;
+    width: 110px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .sleep-time-input:focus { border-color: rgba(124,58,237,0.5); }
+
+  .sleep-log-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 4px;
+    border: 1px solid rgba(124,58,237,0.4);
+    background: rgba(124,58,237,0.1);
+    color: #c4b5fd;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .container { padding: 1rem; }
+    .timeline::before { left: 4.5rem; }
+    .time-block { grid-template-columns: 4rem 1.5rem 1fr; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .tag-rest {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    background: rgba(102,102,102,0.15);
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .completed-check-overlay {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.2;
+    font-size: 1.2rem;
+  }
+
+  .time-block.completed .completed-check-overlay { opacity: 1; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">FIT<span>PROTOCOL</span><span class="mode-indicator" id="sleepModeIndicator">🌙 Sleep Reset</span></div>
+  <div class="header-right">
+    <div class="streak-badge">
+      <span class="streak-flame">🔥</span>
+      <span class="streak-count" id="streakCount">0</span>
+      <span style="font-size:0.65rem;color:var(--muted);">DAY STREAK</span>
+    </div>
+    <div class="date-display" id="dateDisplay"></div>
+  </div>
+</header>
+
+<!-- SLEEP RESET BANNER -->
+<div class="sleep-reset-banner" id="sleepResetBanner">
+  <div class="srb-icon">🌙</div>
+  <div class="srb-text">
+    <div class="srb-title">SLEEP RESET MODE ACTIVE — STREAK PROTECTED</div>
+    <div class="srb-sub" id="srbSubText">Follow the 8-step circadian reset protocol. Your streak is paused, not broken.</div>
+  </div>
+  <div class="srb-day-pills" id="srbDayPills"></div>
+  <button class="srb-exit-btn" onclick="exitSleepReset()">✓ Sleep Fixed</button>
+</div>
+
+<div class="tabs" role="tablist">
+  <button class="tab active" onclick="switchTab('timeline')">📅 Timeline</button>
+  <button class="tab" onclick="switchTab('meals')">🥗 Meal Plan</button>
+  <button class="tab" onclick="switchTab('workout')">💪 Workout</button>
+  <button class="tab" onclick="switchTab('tasks')">✅ Weekly Tasks</button>
+  <button class="tab" onclick="switchTab('grocery')">🛒 Grocery</button>
+  <button class="tab" id="sleepTab" onclick="switchTab('sleep')">🌙 Sleep Reset</button>
+</div>
+
+<!-- ===== TIMELINE TAB ===== -->
+<div class="tab-panel active" id="panel-timeline">
+<div class="container">
+
+  <div class="section-title">DAILY TIMELINE</div>
+  <div class="section-sub" id="dayTypeLabel">WEEKDAY — MONDAY</div>
+
+  <div class="stats-row">
+    <div class="stat-box">
+      <div class="stat-label">Today Done</div>
+      <div class="stat-value" id="statDone" style="color:var(--accent)">0</div>
+      <div class="stat-unit">of <span id="statTotal">0</span> blocks</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Streak</div>
+      <div class="stat-value" id="statStreak" style="color:var(--accent2)">0</div>
+      <div class="stat-unit">days</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Week Score</div>
+      <div class="stat-value" id="statWeek" style="color:var(--accent3)">0%</div>
+      <div class="stat-unit">completion</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Steps Target</div>
+      <div class="stat-value" style="color:var(--success)">10K</div>
+      <div class="stat-unit">daily goal</div>
+    </div>
+  </div>
+
+  <div class="day-progress">
+    <span class="progress-label">Day Progress</span>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <span class="progress-pct" id="progressPct">0%</span>
+  </div>
+
+  <div class="day-selector" id="daySelectorRow"></div>
+
+  <div class="timeline" id="timelineContainer"></div>
+</div>
+</div>
+
+<!-- ===== MEALS TAB ===== -->
+<div class="tab-panel" id="panel-meals">
+<div class="container">
+  <div class="section-title">7-DAY MEAL PLAN</div>
+  <div class="section-sub">~1900 KCAL / 160G PROTEIN PER DAY</div>
+
+  <div class="meal-day-nav" id="mealDayNav"></div>
+  <div class="meal-plan-grid" id="mealGrid"></div>
+  <div class="day-total-bar" id="mealTotalBar"></div>
+</div>
+</div>
+
+<!-- ===== WORKOUT TAB ===== -->
+<div class="tab-panel" id="panel-workout">
+<div class="container">
+  <div class="section-title">12-WEEK WORKOUT PLAN</div>
+  <div class="section-sub">PROGRESSIVE OVERLOAD — TRAIN 5 DAYS/WEEK</div>
+
+  <div class="workout-week">
+    <div style="font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.5rem;">This Week's Workouts</div>
+    <div class="workout-days" id="workoutWeekDays"></div>
+  </div>
+
+  <div id="workoutPlanContainer"></div>
+</div>
+</div>
+
+<!-- ===== WEEKLY TASKS TAB ===== -->
+<div class="tab-panel" id="panel-tasks">
+<div class="container">
+  <div class="section-title">RECURRING TASKS</div>
+  <div class="section-sub">WEEKLY & BI-WEEKLY TRACKER</div>
+
+  <div class="tracker-grid">
+    <div class="tracker-card">
+      <div class="tracker-card-title" style="color:var(--accent)">📦 WEEKLY TASKS</div>
+      <div class="tracker-card-sub">Reset every Monday</div>
+      <div id="weeklyTasksList"></div>
+    </div>
+    <div class="tracker-card">
+      <div class="tracker-card-title" style="color:var(--accent2)">🔄 BI-WEEKLY TASKS</div>
+      <div class="tracker-card-sub">Reset every 2 weeks</div>
+      <div id="biweeklyTasksList"></div>
+    </div>
+  </div>
+
+  <div class="tracker-card" style="margin-top:0">
+    <div class="tracker-card-title" style="color:var(--accent3)">📊 THIS WEEK'S WORKOUTS</div>
+    <div class="tracker-card-sub">5 sessions target — track each day</div>
+    <div class="workout-days" id="weeklyWorkoutDots"></div>
+  </div>
+</div>
+</div>
+
+<!-- ===== SLEEP RESET TAB ===== -->
+<div class="tab-panel" id="panel-sleep">
+<div class="container">
+  <div class="section-title">🌙 SLEEP RESET PROTOCOL</div>
+  <div class="section-sub">CIRCADIAN RHYTHM FIX — 2 TO 4 DAY RESET</div>
+
+  <!-- Trigger / Status Card -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1.5rem;margin-bottom:1.5rem;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+      <div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:0.08em;color:#c4b5fd;margin-bottom:0.4rem;">SLEEP PATTERN STATUS</div>
+        <div id="sleepStatusDesc" style="font-size:0.82rem;color:var(--muted);max-width:500px;line-height:1.6;">
+          Your sleep pattern is fine. If your schedule breaks due to travel, late nights, or unexpected events — activate reset mode below. Your fitness streak will be protected while you fix your sleep.
+        </div>
+        <div id="sleepResetDayCount" style="display:none;margin-top:0.7rem;">
+          <span class="streak-protected">🛡 Streak Protected — Day <span id="resetDayNum">1</span> of 4</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0.6rem;align-items:flex-end;">
+        <button class="sleep-trigger-btn" id="sleepTriggerBtn" onclick="toggleSleepReset()">
+          <span id="sleepBtnIcon">⚠️</span>
+          <span id="sleepBtnText">My Sleep Pattern Broke</span>
+        </button>
+        <div id="sleepReasonRow" style="display:none;gap:0.5rem;flex-wrap:wrap;justify-content:flex-end;" >
+          <span style="font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--muted);">Reason:</span>
+          <button class="srb-day-pill" id="reason-travel" onclick="setResetReason('travel')">✈️ Travel</button>
+          <button class="srb-day-pill" id="reason-work" onclick="setResetReason('work')">💼 Urgent Work</button>
+          <button class="srb-day-pill" id="reason-social" onclick="setResetReason('social')">🎉 Social</button>
+          <button class="srb-day-pill" id="reason-other" onclick="setResetReason('other')">💤 Other</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4-Day Reset Timeline -->
+  <div class="reset-timeline" id="resetTimelineCard">
+    <div style="font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:1rem;">Reset Timeline</div>
+
+    <div class="reset-day-row">
+      <div class="rdr-label">Tonight</div>
+      <div class="rdr-content">
+        <div>Sleep late — it's okay. Don't fight it.</div>
+        <div class="rdr-sleep">Target: Sleep by 1:00 AM</div>
+      </div>
+      <div class="rdr-status" id="rdStatus0">—</div>
+    </div>
+
+    <div class="reset-day-row">
+      <div class="rdr-label">Day 1</div>
+      <div class="rdr-content">
+        <div>Wake at 6:30–7 AM despite tiredness. Sunlight immediately.</div>
+        <div class="rdr-sleep">Target: Sleep by 11:30 PM</div>
+      </div>
+      <div class="rdr-status" id="rdStatus1">—</div>
+    </div>
+
+    <div class="reset-day-row">
+      <div class="rdr-label">Day 2</div>
+      <div class="rdr-content">
+        <div>Morning gym + sunlight. Stop caffeine after 1 PM.</div>
+        <div class="rdr-sleep">Target: Sleep by 11:00 PM</div>
+      </div>
+      <div class="rdr-status" id="rdStatus2">—</div>
+    </div>
+
+    <div class="reset-day-row">
+      <div class="rdr-label">Day 3</div>
+      <div class="rdr-content">
+        <div>Wind-down routine active. Back to protocol sleep schedule.</div>
+        <div class="rdr-sleep">Target: Sleep by 10:30 PM → Back to 10 PM</div>
+      </div>
+      <div class="rdr-status" id="rdStatus3">—</div>
+    </div>
+
+    <div class="reset-day-row" style="border-bottom:none;">
+      <div class="rdr-label" style="color:var(--accent)">Day 4</div>
+      <div class="rdr-content">
+        <div style="color:var(--accent)">✓ Full protocol resumes. Streak continues.</div>
+        <div class="rdr-sleep">Back to: 10:00 PM sleep / 5:15 AM wake</div>
+      </div>
+      <div class="rdr-status" id="rdStatus4">—</div>
+    </div>
+  </div>
+
+  <!-- Sleep Log (shown during reset) -->
+  <div id="sleepLogSection" style="display:none;background:var(--surface);border:1px solid rgba(124,58,237,0.3);border-radius:8px;padding:1.5rem;margin-bottom:1.5rem;">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:0.08em;color:#c4b5fd;margin-bottom:1rem;">LOG TODAY'S SLEEP</div>
+    <div class="sleep-log-row">
+      <span class="sleep-log-label">I slept at:</span>
+      <input type="time" class="sleep-time-input" id="sleepTimeInput" value="01:00">
+      <span class="sleep-log-label">I woke at:</span>
+      <input type="time" class="sleep-time-input" id="wakeTimeInput" value="07:00">
+      <button class="sleep-log-btn" onclick="logSleepEntry()">Log Sleep</button>
+    </div>
+    <div id="sleepLogHistory" style="margin-top:0.5rem;"></div>
+  </div>
+
+  <!-- 8 Steps -->
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.08em;margin-bottom:1rem;margin-top:0.5rem;">THE 8-STEP RESET PROTOCOL</div>
+  <div style="font-size:0.78rem;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:1.5rem;">TAP A STEP TO EXPAND DETAILS • CHECK OFF AS YOU COMPLETE EACH DAY</div>
+
+  <div id="sleepStepsList"></div>
+
+  <!-- Tips box -->
+  <div style="background:rgba(124,58,237,0.06);border:1px solid rgba(124,58,237,0.2);border-radius:8px;padding:1.3rem;margin-top:1rem;">
+    <div style="font-family:'Space Mono',monospace;font-size:0.65rem;color:#a78bfa;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.8rem;">⚡ Key Rules During Reset</div>
+    <div style="display:flex;flex-direction:column;gap:0.5rem;">
+      <div style="font-size:0.8rem;display:flex;gap:0.6rem;"><span style="color:#7c3aed;">▸</span> Do NOT sleep in past 7 AM, even if you slept late</div>
+      <div style="font-size:0.8rem;display:flex;gap:0.6rem;"><span style="color:#7c3aed;">▸</span> No caffeine after 1 PM — it delays melatonin by 6–8 hours</div>
+      <div style="font-size:0.8rem;display:flex;gap:0.6rem;"><span style="color:#7c3aed;">▸</span> Morning sunlight is the single most powerful reset tool</div>
+      <div style="font-size:0.8rem;display:flex;gap:0.6rem;"><span style="color:#7c3aed;">▸</span> Dim all lights after 9 PM — blue light blocks melatonin</div>
+      <div style="font-size:0.8rem;display:flex;gap:0.6rem;"><span style="color:#7c3aed;">▸</span> Magnesium Glycinate 200–400mg, 30–60 min before bed (optional)</div>
+      <div style="font-size:0.8rem;display:flex;gap:0.6rem;"><span style="color:#7c3aed;">▸</span> If you can't sleep after 20 min — get up, read, dim lights, return when sleepy</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ===== GROCERY TAB ===== -->
+<div class="tab-panel" id="panel-grocery">
+<div class="container">
+  <div class="section-title">GROCERY LIST</div>
+  <div class="section-sub">BUY EVERY SUNDAY — CHECK OFF AS YOU GO</div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;" class="grocery-cols">
+    <div>
+      <div class="grocery-section">
+        <div class="grocery-section-title">🥚 Buy Every Sunday</div>
+        <div id="grocerySundayList"></div>
+      </div>
+    </div>
+    <div>
+      <div class="grocery-section">
+        <div class="grocery-section-title">🍗 Buy Every Two Weeks</div>
+        <div id="groceryBiweeklyList"></div>
+      </div>
+      <div class="grocery-section" style="margin-top:1.5rem;">
+        <div class="grocery-section-title">📦 Pantry / Restock</div>
+        <div id="groceryPantryList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:1.5rem;display:flex;gap:1rem;">
+    <button onclick="clearGrocery()" style="font-family:'Space Mono',monospace;font-size:0.7rem;padding:0.6rem 1.2rem;border:1px solid var(--border);background:none;color:var(--muted);border-radius:4px;cursor:pointer;text-transform:uppercase;letter-spacing:0.08em;">Reset List</button>
+  </div>
+</div>
+</div>
+
+<script>
+// ===== DATA DEFINITIONS =====
+
+const WEEKDAY_SCHEDULE = [
+  { time: "5:15", title: "Wake Up + Hydrate", desc: "Drink water, have a banana + black coffee", cat: "routine", tag: "Morning" },
+  { time: "5:40", title: "Leave for Gym / Warm-Up", desc: "Head to gym, warm up before training", cat: "workout", tag: "Workout" },
+  { time: "6:00", title: "Strength Training", desc: "1 hour strength session — follow the 12-week plan", cat: "workout", tag: "Workout" },
+  { time: "7:00", title: "Post-Workout Meal", desc: "Whey protein shake + eggs + oats", cat: "meal", tag: "Nutrition" },
+  { time: "7:30", title: "Get Ready + Commute", desc: "Shower, prep, head to work", cat: "routine", tag: "Routine" },
+  { time: "8:30", title: "Work Block I", desc: "Deep work — stand & walk 2 min every hour", cat: "work", tag: "Work" },
+  { time: "12:30", title: "Lunch", desc: "Meal prep container: chicken + rice + vegetables. Take a short walk after", cat: "meal", tag: "Nutrition" },
+  { time: "13:00", title: "Work Block II", desc: "Continue hourly movement breaks throughout afternoon", cat: "work", tag: "Work" },
+  { time: "16:00", title: "Afternoon Snack", desc: "Greek yogurt + almonds", cat: "meal", tag: "Nutrition" },
+  { time: "17:30", title: "Work Ends", desc: "Wrap up work, start commute home", cat: "work", tag: "Work" },
+  { time: "18:30", title: "Evening Walk", desc: "Complete 10–12k steps target. Fresh air, decompress", cat: "walk", tag: "Active" },
+  { time: "20:00", title: "Dinner", desc: "Chicken / fish + vegetables. Avoid large heavy meals.", cat: "meal", tag: "Nutrition" },
+  { time: "21:30", title: "Wind Down + Stretching", desc: "Light stretching, mobility work. No screens stress.", cat: "routine", tag: "Recovery" },
+  { time: "22:00", title: "Sleep", desc: "7–8 hours for muscle recovery and hormone balance", cat: "sleep", tag: "Sleep" },
+];
+
+const WEEKEND_SAT_SCHEDULE = [
+  { time: "7:00", title: "Wake Up + Hydrate", desc: "Natural wake, drink water", cat: "routine", tag: "Morning" },
+  { time: "7:30", title: "Breakfast", desc: "Eggs + oats + fruit", cat: "meal", tag: "Nutrition" },
+  { time: "9:00", title: "Gym Session", desc: "Full body training — Saturday session", cat: "workout", tag: "Workout" },
+  { time: "10:30", title: "Post-Workout Meal", desc: "Whey + banana + eggs", cat: "meal", tag: "Nutrition" },
+  { time: "12:00", title: "Afternoon — Stay Active", desc: "Free time but stay active: walks, errands, cycling", cat: "walk", tag: "Active" },
+  { time: "20:00", title: "Dinner + Relaxation", desc: "Normal dinner and relaxation time", cat: "meal", tag: "Nutrition" },
+  { time: "22:30", title: "Sleep", desc: "Rest and recovery — aim for 8 hours", cat: "sleep", tag: "Sleep" },
+];
+
+const WEEKEND_SUN_SCHEDULE = [
+  { time: "7:00", title: "Wake Up + Hydrate", desc: "Natural wake, drink water", cat: "routine", tag: "Morning" },
+  { time: "7:30", title: "Breakfast", desc: "Eggs + oats + fruit", cat: "meal", tag: "Nutrition" },
+  { time: "9:00", title: "Recovery Walk", desc: "45–60 min walk + mobility / stretching session", cat: "walk", tag: "Recovery" },
+  { time: "11:00", title: "Grocery Shopping", desc: "Buy weekly groceries — use the grocery list tab!", cat: "routine", tag: "Task" },
+  { time: "13:00", title: "Lunch", desc: "Meal prep container or fresh cook", cat: "meal", tag: "Nutrition" },
+  { time: "15:00", title: "Meal Prep (Sun–Wed)", desc: "Cook 1.2kg chicken, 450g rice, vegetables. Portion into 6 containers for Mon–Wed", cat: "meal", tag: "Prep" },
+  { time: "17:00", title: "Rest + Free Time", desc: "Recovery, light activity, relaxation", cat: "routine", tag: "Recovery" },
+  { time: "20:00", title: "Dinner", desc: "Normal dinner + prepare for the week ahead", cat: "meal", tag: "Nutrition" },
+  { time: "22:30", title: "Sleep", desc: "Rest and recovery — great week incoming!", cat: "sleep", tag: "Sleep" },
+];
+
+const MEAL_PLAN = [
+  {
+    day: "Day 1",
+    meals: [
+      { name: "Breakfast", desc: "4 eggs, 50g oats, black coffee", p: 28, c: 35, f: 18, kcal: 410 },
+      { name: "Lunch", desc: "200g chicken, 120g cooked rice, vegetables", p: 52, c: 42, f: 6, kcal: 430 },
+      { name: "Post-Workout", desc: "Whey protein + banana", p: 25, c: 28, f: 2, kcal: 230 },
+      { name: "Dinner", desc: "200g chicken + broccoli", p: 48, c: 8, f: 6, kcal: 280 },
+      { name: "Snack", desc: "Greek yogurt + almonds", p: 15, c: 12, f: 10, kcal: 195 },
+    ],
+    totals: { p: 168, c: 125, f: 42, kcal: 1545 }
+  },
+  {
+    day: "Day 2",
+    meals: [
+      { name: "Breakfast", desc: "3 eggs + 2 egg whites, oats", p: 26, c: 30, f: 12, kcal: 330 },
+      { name: "Lunch", desc: "Chicken + rice + vegetables", p: 50, c: 42, f: 6, kcal: 425 },
+      { name: "Post-Workout", desc: "Whey protein + banana", p: 25, c: 28, f: 2, kcal: 230 },
+      { name: "Dinner", desc: "200g fish + sweet potato", p: 44, c: 30, f: 5, kcal: 340 },
+      { name: "Snack", desc: "Greek yogurt", p: 15, c: 9, f: 4, kcal: 130 },
+    ],
+    totals: { p: 160, c: 139, f: 29, kcal: 1455 }
+  },
+  {
+    day: "Day 3",
+    meals: [
+      { name: "Breakfast", desc: "4 eggs + apple", p: 24, c: 20, f: 16, kcal: 320 },
+      { name: "Lunch", desc: "Chicken + rice", p: 48, c: 40, f: 6, kcal: 410 },
+      { name: "Post-Workout", desc: "Whey shake", p: 25, c: 5, f: 2, kcal: 138 },
+      { name: "Dinner", desc: "Paneer/tofu + vegetables", p: 28, c: 12, f: 14, kcal: 285 },
+      { name: "Snack", desc: "Almonds", p: 6, c: 6, f: 14, kcal: 170 },
+    ],
+    totals: { p: 131, c: 83, f: 52, kcal: 1323 }
+  },
+  {
+    day: "Day 4",
+    meals: [
+      { name: "Breakfast", desc: "4 eggs, oats, black coffee", p: 28, c: 35, f: 18, kcal: 410 },
+      { name: "Lunch", desc: "Chicken + rice + vegetables", p: 50, c: 42, f: 6, kcal: 425 },
+      { name: "Post-Workout", desc: "Whey protein + banana", p: 25, c: 28, f: 2, kcal: 230 },
+      { name: "Dinner", desc: "Chicken + broccoli", p: 48, c: 8, f: 6, kcal: 280 },
+      { name: "Snack", desc: "Greek yogurt", p: 15, c: 9, f: 4, kcal: 130 },
+    ],
+    totals: { p: 166, c: 122, f: 36, kcal: 1475 }
+  },
+  {
+    day: "Day 5",
+    meals: [
+      { name: "Breakfast", desc: "Oats + whey mixed", p: 28, c: 35, f: 5, kcal: 300 },
+      { name: "Lunch", desc: "Chicken + sweet potato", p: 48, c: 30, f: 5, kcal: 360 },
+      { name: "Post-Workout", desc: "Whey + banana", p: 25, c: 28, f: 2, kcal: 230 },
+      { name: "Dinner", desc: "Fish + vegetables", p: 40, c: 12, f: 5, kcal: 255 },
+      { name: "Snack", desc: "Greek yogurt", p: 15, c: 9, f: 4, kcal: 130 },
+    ],
+    totals: { p: 156, c: 114, f: 21, kcal: 1275 }
+  },
+  {
+    day: "Day 6",
+    meals: [
+      { name: "Breakfast", desc: "Eggs + oats", p: 26, c: 35, f: 16, kcal: 390 },
+      { name: "Lunch", desc: "Chicken + rice", p: 48, c: 40, f: 6, kcal: 410 },
+      { name: "Post-Workout", desc: "Whey", p: 25, c: 5, f: 2, kcal: 138 },
+      { name: "Dinner", desc: "Paneer/tofu", p: 28, c: 8, f: 14, kcal: 270 },
+      { name: "Snack", desc: "Almonds", p: 6, c: 6, f: 14, kcal: 170 },
+    ],
+    totals: { p: 133, c: 94, f: 52, kcal: 1378 }
+  },
+  {
+    day: "Day 7",
+    meals: [
+      { name: "Breakfast", desc: "Eggs + fruit", p: 24, c: 22, f: 16, kcal: 330 },
+      { name: "Lunch", desc: "Chicken + rice", p: 48, c: 40, f: 6, kcal: 410 },
+      { name: "Post-Workout", desc: "Whey + banana", p: 25, c: 28, f: 2, kcal: 230 },
+      { name: "Dinner", desc: "Fish or chicken", p: 44, c: 5, f: 6, kcal: 250 },
+      { name: "Snack", desc: "Greek yogurt", p: 15, c: 9, f: 4, kcal: 130 },
+    ],
+    totals: { p: 156, c: 104, f: 34, kcal: 1350 }
+  },
+];
+
+const WORKOUT_PLAN = [
+  { day: "Day 1", focus: "Chest + Triceps", exercises: [
+    { name: "Bench Press", sets: "4 × 6–8 reps" },
+    { name: "Incline Dumbbell Press", sets: "4 × 8–10 reps" },
+    { name: "Cable / Dumbbell Fly", sets: "3 × 12 reps" },
+    { name: "Dips", sets: "3 × failure" },
+    { name: "Tricep Pushdown", sets: "3 × 12 reps" },
+  ]},
+  { day: "Day 2", focus: "Back + Biceps", exercises: [
+    { name: "Pull-ups", sets: "4 × failure" },
+    { name: "Barbell / Dumbbell Row", sets: "4 × 6–8 reps" },
+    { name: "Lat Pulldown", sets: "3 × 10 reps" },
+    { name: "Face Pull", sets: "3 × 15 reps" },
+    { name: "Bicep Curl", sets: "3 × 12 reps" },
+  ]},
+  { day: "Day 3", focus: "Legs", exercises: [
+    { name: "Squat", sets: "5 × 5 reps" },
+    { name: "Romanian Deadlift", sets: "4 × 8 reps" },
+    { name: "Leg Press", sets: "3 × 12 reps" },
+    { name: "Walking Lunges", sets: "3 × 12 each leg" },
+    { name: "Calf Raises", sets: "4 × 15 reps" },
+  ]},
+  { day: "Day 4", focus: "Shoulders", exercises: [
+    { name: "Overhead Press", sets: "4 × 6–8 reps" },
+    { name: "Lateral Raise", sets: "4 × 15 reps" },
+    { name: "Rear Delt Fly", sets: "3 × 15 reps" },
+    { name: "Dumbbell Shrugs", sets: "3 × 12 reps" },
+  ]},
+  { day: "Day 5", focus: "Full Body + Core", exercises: [
+    { name: "Deadlift", sets: "5 × 5 reps" },
+    { name: "Pull-ups", sets: "3 × failure" },
+    { name: "Pushups", sets: "3 × failure" },
+    { name: "Hanging Leg Raises", sets: "3 × 12 reps" },
+    { name: "Plank", sets: "3 × 60 seconds" },
+  ]},
+];
+
+const WEEKLY_TASKS = [
+  { id: "wt1", name: "Sunday Grocery Shopping", desc: "Buy all items from the grocery list" },
+  { id: "wt2", name: "Plan the Week", desc: "Review workout schedule & meal plan for coming days" },
+  { id: "wt3", name: "Sunday Recovery Walk", desc: "45–60 min walk + mobility/stretching" },
+  { id: "wt4", name: "Track Body Weight", desc: "Weigh in once a week, same time, same conditions" },
+  { id: "wt5", name: "Check Progressive Overload", desc: "Review strength numbers, plan next week increases" },
+];
+
+const BIWEEKLY_TASKS = [
+  { id: "bwt1", name: "Chicken Order (2.5kg)", desc: "Order chicken breast — enough for 2 weeks of prep" },
+  { id: "bwt2", name: "Wednesday Meal Prep (Thu–Sat)", desc: "Cook 1.2kg chicken, 450g rice, vegetables. Portion 6 containers" },
+  { id: "bwt3", name: "Whey Protein Restock Check", desc: "Check protein powder levels, reorder if needed" },
+];
+
+const GROCERY_SUNDAY = [
+  { name: "Eggs", qty: "30 pcs" },
+  { name: "Greek Yogurt", qty: "~1 kg" },
+  { name: "Oats", qty: "500 g" },
+  { name: "Rice", qty: "700 g" },
+  { name: "Bananas", qty: "7 pcs" },
+  { name: "Apples / other fruit", qty: "4–5 pcs" },
+  { name: "Broccoli", qty: "500 g" },
+  { name: "Carrots", qty: "300 g" },
+  { name: "Spinach", qty: "300 g" },
+  { name: "Bell Peppers", qty: "3 pcs" },
+  { name: "Onions", qty: "4–5 pcs" },
+  { name: "Tomatoes", qty: "4–5 pcs" },
+  { name: "Garlic & Ginger", qty: "as needed" },
+  { name: "Almonds", qty: "200 g" },
+];
+
+const GROCERY_BIWEEKLY = [
+  { name: "Chicken Breast", qty: "2.5 kg (order online)" },
+];
+
+const GROCERY_PANTRY = [
+  { name: "Olive Oil", qty: "refill if needed" },
+  { name: "Whey Protein", qty: "restock if low" },
+  { name: "Salt, Pepper, Paprika, Garlic powder", qty: "spices" },
+];
+
+// ===== INDEXEDDB SETUP =====
+
+let db;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('FitProtocolDB', 2);
+    req.onupgradeneeded = (e) => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('state')) d.createObjectStore('state', { keyPath: 'key' });
+    };
+    req.onsuccess = (e) => { db = e.target.result; resolve(db); };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbGet(key) {
+  return new Promise((resolve) => {
+    const tx = db.transaction('state', 'readonly');
+    const req = tx.objectStore('state').get(key);
+    req.onsuccess = () => resolve(req.result ? req.result.value : null);
+    req.onerror = () => resolve(null);
+  });
+}
+
+function dbSet(key, value) {
+  return new Promise((resolve) => {
+    const tx = db.transaction('state', 'readwrite');
+    tx.objectStore('state').put({ key, value });
+    tx.oncomplete = resolve;
+  });
+}
+
+// ===== APP STATE =====
+
+const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+let selectedDay = 0; // 0=Mon ... 6=Sun
+let appState = {
+  timelineChecks: {}, // { "Mon_0": true, ... }
+  weeklyTasks: {},    // { wt1: { done: true, week: "2024-W01" } }
+  biweeklyTasks: {},  // { bwt1: { done: true, period: "2024-BW01" } }
+  workoutWeek: {},    // { "2024-W01_Mon": true }
+  groceryChecks: {},  // { "item_name": true }
+  streak: 0,
+  lastStreakDate: null,
+  weeklyCompletions: {} // { "2024-W01_Mon": 0.8 }
+};
+
+function todayStr() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function getWeekKey() {
+  const d = new Date();
+  const jan1 = new Date(d.getFullYear(), 0, 1);
+  const week = Math.ceil((((d - jan1) / 86400000) + jan1.getDay() + 1) / 7);
+  return `${d.getFullYear()}-W${String(week).padStart(2,'0')}`;
+}
+
+function getBiweekKey() {
+  const d = new Date();
+  const jan1 = new Date(d.getFullYear(), 0, 1);
+  const week = Math.ceil((((d - jan1) / 86400000) + jan1.getDay() + 1) / 7);
+  const bw = Math.ceil(week / 2);
+  return `${d.getFullYear()}-BW${String(bw).padStart(2,'0')}`;
+}
+
+function getDayKey(dayIdx) { return DAYS[dayIdx].substring(0,3); }
+
+function getScheduleForDay(dayIdx) {
+  if (dayIdx === 5) return WEEKEND_SAT_SCHEDULE;
+  if (dayIdx === 6) return WEEKEND_SUN_SCHEDULE;
+  return WEEKDAY_SCHEDULE;
+}
+
+// ===== STREAK LOGIC =====
+
+function updateStreak() {
+  const today = todayStr();
+  const schedule = getScheduleForDay(new Date().getDay() === 0 ? 6 : new Date().getDay() - 1);
+  const dayKey = getDayKey(new Date().getDay() === 0 ? 6 : new Date().getDay() - 1);
+  const total = schedule.length;
+  let done = 0;
+  for (let i = 0; i < total; i++) {
+    if (appState.timelineChecks[`${dayKey}_${i}`]) done++;
+  }
+  const pct = total > 0 ? done / total : 0;
+
+  if (pct >= 0.8) { // 80%+ = day counts
+    if (appState.lastStreakDate !== today) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yd = yesterday.toISOString().split('T')[0];
+      if (appState.lastStreakDate === yd) {
+        appState.streak++;
+      } else if (!appState.lastStreakDate) {
+        appState.streak = 1;
+      } else {
+        appState.streak = 1;
+      }
+      appState.lastStreakDate = today;
+    }
+  }
+  document.getElementById('streakCount').textContent = appState.streak;
+  document.getElementById('statStreak').textContent = appState.streak;
+}
+
+// ===== RENDER TIMELINE =====
+
+function renderTimeline() {
+  const schedule = getScheduleForDay(selectedDay);
+  const dayKey = getDayKey(selectedDay);
+  const isWeekend = selectedDay >= 5;
+  const dayName = DAYS[selectedDay];
+  const typeLabel = selectedDay === 6 ? 'SUNDAY — RECOVERY + PREP DAY' :
+                    selectedDay === 5 ? 'SATURDAY — FULL BODY + REST' :
+                    `WEEKDAY — ${dayName.toUpperCase()}`;
+
+  document.getElementById('dayTypeLabel').textContent = typeLabel;
+
+  const container = document.getElementById('timelineContainer');
+  container.innerHTML = '';
+
+  const now = new Date();
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+
+  let doneCount = 0;
+  schedule.forEach((block, idx) => {
+    const key = `${dayKey}_${idx}`;
+    const checked = !!appState.timelineChecks[key];
+    if (checked) doneCount++;
+
+    // Determine active-now
+    const [h, m] = block.time.split(':').map(Number);
+    const blockMin = h * 60 + (m || 0);
+    const nextMin = idx + 1 < schedule.length ? (() => {
+      const [nh, nm] = schedule[idx+1].time.split(':').map(Number);
+      return nh * 60 + (nm || 0);
+    })() : blockMin + 90;
+
+    // Only highlight today's active block
+    const todayDayIdx = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
+    const isActiveNow = selectedDay === todayDayIdx && nowMin >= blockMin && nowMin < nextMin;
+
+    const div = document.createElement('div');
+    div.className = `time-block cat-${block.cat}${checked ? ' completed' : ''}${isActiveNow ? ' active-now' : ''}`;
+    div.innerHTML = `
+      <div class="time-label">${block.time}</div>
+      <div class="time-dot-wrap">
+        <div class="time-dot" onclick="toggleBlock('${key}', ${idx}, '${dayKey}')"></div>
+      </div>
+      <div class="block-card${checked ? ' checked' : ''}" onclick="toggleBlock('${key}', ${idx}, '${dayKey}')">
+        <div class="block-header">
+          <div class="block-title">${block.title}</div>
+          <span class="block-tag">${block.tag}</span>
+        </div>
+        <div class="block-desc">${block.desc}</div>
+        <div class="completed-check-overlay">${checked ? '✓' : ''}</div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+
+  // Update progress
+  const total = schedule.length;
+  const pct = total > 0 ? Math.round((doneCount / total) * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('statDone').textContent = doneCount;
+  document.getElementById('statTotal').textContent = total;
+
+  updateWeekScore();
+  updateStreak();
+  saveState();
+}
+
+function toggleBlock(key, idx, dayKey) {
+  appState.timelineChecks[key] = !appState.timelineChecks[key];
+  renderTimeline();
+}
+
+// ===== DAY SELECTOR =====
+
+function renderDaySelector() {
+  const row = document.getElementById('daySelectorRow');
+  row.innerHTML = '';
+  DAYS.forEach((day, idx) => {
+    const dayKey = getDayKey(idx);
+    const schedule = getScheduleForDay(idx);
+    let done = 0;
+    for (let i = 0; i < schedule.length; i++) {
+      if (appState.timelineChecks[`${dayKey}_${i}`]) done++;
+    }
+    const isComplete = done === schedule.length && schedule.length > 0;
+    const btn = document.createElement('button');
+    btn.className = `day-btn${idx === selectedDay ? ' active' : ''}${isComplete ? ' completed-day' : ''}`;
+    btn.textContent = day.substring(0,3).toUpperCase() + (isComplete ? ' ✓' : '');
+    btn.onclick = () => { selectedDay = idx; renderDaySelector(); renderTimeline(); };
+    row.appendChild(btn);
+  });
+}
+
+// ===== WEEK SCORE =====
+
+function updateWeekScore() {
+  let totalPossible = 0, totalDone = 0;
+  DAYS.forEach((day, idx) => {
+    const schedule = getScheduleForDay(idx);
+    const dayKey = getDayKey(idx);
+    totalPossible += schedule.length;
+    for (let i = 0; i < schedule.length; i++) {
+      if (appState.timelineChecks[`${dayKey}_${i}`]) totalDone++;
+    }
+  });
+  const pct = totalPossible > 0 ? Math.round((totalDone / totalPossible) * 100) : 0;
+  document.getElementById('statWeek').textContent = pct + '%';
+}
+
+// ===== MEAL PLAN =====
+
+let selectedMealDay = 0;
+
+function renderMealPlan() {
+  const nav = document.getElementById('mealDayNav');
+  nav.innerHTML = '';
+  MEAL_PLAN.forEach((d, idx) => {
+    const btn = document.createElement('button');
+    btn.className = `day-btn${idx === selectedMealDay ? ' active' : ''}`;
+    btn.textContent = d.day;
+    btn.onclick = () => { selectedMealDay = idx; renderMealPlan(); };
+    nav.appendChild(btn);
+  });
+
+  const plan = MEAL_PLAN[selectedMealDay];
+  const grid = document.getElementById('mealGrid');
+  grid.innerHTML = '';
+  plan.meals.forEach(meal => {
+    const card = document.createElement('div');
+    card.className = 'meal-card';
+    card.innerHTML = `
+      <div class="meal-card-title">${meal.name}</div>
+      <div class="meal-desc">${meal.desc}</div>
+      <div class="macro-row">
+        <span class="macro-chip p">P: ${meal.p}g</span>
+        <span class="macro-chip c">C: ${meal.c}g</span>
+        <span class="macro-chip f">F: ${meal.f}g</span>
+        <span class="macro-chip cal">${meal.kcal} kcal</span>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  const t = plan.totals;
+  document.getElementById('mealTotalBar').innerHTML = `
+    <div style="font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;align-self:center;margin-right:1rem;">Daily Total</div>
+    <div class="total-item"><div class="total-val" style="color:var(--accent)">${t.p}g</div><div class="total-lab">Protein</div></div>
+    <div class="total-item"><div class="total-val" style="color:var(--accent3)">${t.c}g</div><div class="total-lab">Carbs</div></div>
+    <div class="total-item"><div class="total-val" style="color:var(--accent2)">${t.f}g</div><div class="total-lab">Fat</div></div>
+    <div class="total-item"><div class="total-val">${t.kcal}</div><div class="total-lab">Calories</div></div>
+  `;
+}
+
+// ===== WORKOUT PLAN =====
+
+function renderWorkoutPlan() {
+  const container = document.getElementById('workoutPlanContainer');
+  container.innerHTML = '';
+  WORKOUT_PLAN.forEach(day => {
+    const div = document.createElement('div');
+    div.className = 'workout-plan-day';
+    div.innerHTML = `
+      <div class="wp-day-title">${day.day} <span class="wp-focus-tag">${day.focus}</span></div>
+      <div class="exercise-list">
+        ${day.exercises.map(ex => `
+          <div class="exercise-row">
+            <div class="ex-name">${ex.name}</div>
+            <div class="ex-sets">${ex.sets}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    container.appendChild(div);
+  });
+
+  renderWorkoutWeekDots();
+}
+
+function renderWorkoutWeekDots() {
+  const weekKey = getWeekKey();
+  const container = document.getElementById('workoutWeekDays');
+  if (!container) return;
+  container.innerHTML = '';
+  const workoutDays = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const isWorkoutDay = [true, true, true, true, true, true, false]; // Sun is rest
+
+  workoutDays.forEach((d, idx) => {
+    const key = `${weekKey}_${d}`;
+    const done = !!appState.workoutWeek[key];
+    const isRest = !isWorkoutDay[idx];
+
+    const wrap = document.createElement('div');
+    wrap.className = 'workout-day-badge';
+
+    const label = document.createElement('div');
+    label.className = 'wd-label';
+    label.textContent = d;
+
+    const circle = document.createElement('div');
+    circle.className = `wd-circle${done ? ' done' : ''}${isRest ? ' rest' : ''}`;
+    circle.textContent = isRest ? 'REST' : (done ? '✓' : WORKOUT_PLAN[Math.min(idx, 4)]?.focus?.split(' ')[0] || '?');
+
+    if (!isRest) {
+      circle.onclick = () => {
+        appState.workoutWeek[key] = !appState.workoutWeek[key];
+        saveState();
+        renderWorkoutPlan();
+        renderWeeklyWorkoutDots();
+      };
+    }
+
+    wrap.appendChild(label);
+    wrap.appendChild(circle);
+    container.appendChild(wrap);
+  });
+}
+
+// ===== WEEKLY TASKS =====
+
+function renderWeeklyTasks() {
+  const weekKey = getWeekKey();
+  const bwKey = getBiweekKey();
+
+  const wList = document.getElementById('weeklyTasksList');
+  wList.innerHTML = '';
+  WEEKLY_TASKS.forEach(task => {
+    const stateKey = `${weekKey}_${task.id}`;
+    const done = !!(appState.weeklyTasks[stateKey]);
+    const item = document.createElement('div');
+    item.className = 'tracker-item';
+    item.innerHTML = `
+      <div class="tracker-dot${done ? ' done' : ''}">
+        ${done ? '<svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="#000" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>' : ''}
+      </div>
+      <div class="tracker-item-info">
+        <div class="tracker-item-name">${task.name}</div>
+        <div class="tracker-item-desc">${task.desc}</div>
+      </div>
+    `;
+    item.onclick = () => {
+      appState.weeklyTasks[stateKey] = !appState.weeklyTasks[stateKey];
+      saveState();
+      renderWeeklyTasks();
+    };
+    wList.appendChild(item);
+  });
+
+  const bwList = document.getElementById('biweeklyTasksList');
+  bwList.innerHTML = '';
+  BIWEEKLY_TASKS.forEach(task => {
+    const stateKey = `${bwKey}_${task.id}`;
+    const done = !!(appState.biweeklyTasks[stateKey]);
+    const item = document.createElement('div');
+    item.className = 'tracker-item';
+    item.innerHTML = `
+      <div class="tracker-dot${done ? ' done' : ''}" style="${done ? '' : 'border-color:rgba(241,160,53,0.4)'}">
+        ${done ? '<svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="#000" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>' : ''}
+      </div>
+      <div class="tracker-item-info">
+        <div class="tracker-item-name">${task.name}</div>
+        <div class="tracker-item-desc">${task.desc}</div>
+        <div class="last-done">${done ? '✓ Completed this period' : 'Pending this 2-week period'}</div>
+      </div>
+    `;
+    item.onclick = () => {
+      appState.biweeklyTasks[stateKey] = !appState.biweeklyTasks[stateKey];
+      saveState();
+      renderWeeklyTasks();
+    };
+    bwList.appendChild(item);
+  });
+
+  renderWeeklyWorkoutDots();
+}
+
+function renderWeeklyWorkoutDots() {
+  const weekKey = getWeekKey();
+  const container = document.getElementById('weeklyWorkoutDots');
+  if (!container) return;
+  container.innerHTML = '';
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat'];
+  const focuses = ['Chest+Tri', 'Back+Bi', 'Legs', 'Shoulders', 'Full Body', 'Full Body'];
+  days.forEach((d, idx) => {
+    const key = `${weekKey}_${d}`;
+    const done = !!appState.workoutWeek[key];
+    const wrap = document.createElement('div');
+    wrap.className = 'workout-day-badge';
+    wrap.innerHTML = `
+      <div class="wd-label">${d}</div>
+      <div class="wd-circle${done ? ' done' : ''}" style="font-size:0.55rem;">${done ? '✓' : focuses[idx]}</div>
+    `;
+    wrap.querySelector('.wd-circle').onclick = () => {
+      appState.workoutWeek[key] = !appState.workoutWeek[key];
+      saveState();
+      renderWeeklyTasks();
+      renderWorkoutPlan();
+    };
+    container.appendChild(wrap);
+  });
+}
+
+// ===== GROCERY =====
+
+function renderGrocery() {
+  renderGroceryList('grocerySundayList', GROCERY_SUNDAY, 'sun');
+  renderGroceryList('groceryBiweeklyList', GROCERY_BIWEEKLY, 'bw');
+  renderGroceryList('groceryPantryList', GROCERY_PANTRY, 'pantry');
+}
+
+function renderGroceryList(containerId, items, prefix) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  items.forEach((item, idx) => {
+    const key = `${prefix}_${idx}`;
+    const checked = !!appState.groceryChecks[key];
+    const div = document.createElement('div');
+    div.className = `grocery-item${checked ? ' checked-item' : ''}`;
+    div.innerHTML = `
+      <div class="checkbox-custom${checked ? ' checked' : ''}">
+        <svg width="10" height="10" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#000" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+      </div>
+      <div class="grocery-item-name">${item.name}</div>
+      <div class="grocery-item-qty">${item.qty}</div>
+    `;
+    div.onclick = () => {
+      appState.groceryChecks[key] = !appState.groceryChecks[key];
+      saveState();
+      renderGrocery();
+    };
+    container.appendChild(div);
+  });
+}
+
+function clearGrocery() {
+  appState.groceryChecks = {};
+  saveState();
+  renderGrocery();
+}
+
+// ===== DATE DISPLAY =====
+
+function updateDateDisplay() {
+  const d = new Date();
+  const opts = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' };
+  document.getElementById('dateDisplay').textContent = d.toLocaleDateString('en-IN', opts).toUpperCase();
+}
+
+// ===== TAB SWITCHING =====
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+
+  if (tab === 'meals') renderMealPlan();
+  if (tab === 'workout') renderWorkoutPlan();
+  if (tab === 'tasks') renderWeeklyTasks();
+  if (tab === 'grocery') renderGrocery();
+  if (tab === 'sleep') renderSleepReset();
+}
+
+// ===== SAVE / LOAD STATE =====
+
+async function saveState() {
+  await dbSet('appState', appState);
+}
+
+async function loadState() {
+  const saved = await dbGet('appState');
+  if (saved) {
+    appState = { ...appState, ...saved };
+  }
+}
+
+// ===== SLEEP RESET DATA =====
+
+const SLEEP_STEPS = [
+  {
+    id: "ss1",
+    title: "Wake Up Early — No Matter What",
+    desc: "Even if you slept at 1–2 AM, wake at 6:30–7 AM tomorrow. This builds sleep pressure for the next night.",
+    detail: "→ Set an alarm tonight for 6:30 AM\n→ Do NOT snooze or go back to sleep\n→ Getting up tired is the whole point — it resets your pressure system\n→ This is the single most important step"
+  },
+  {
+    id: "ss2",
+    title: "Get Morning Sunlight Immediately",
+    desc: "Within 30 minutes of waking, get outside. Sunlight tells your brain 'it's daytime' and resets the internal clock.",
+    detail: "→ 10–15 minutes outdoors is enough\n→ Don't wear sunglasses during this time\n→ Even on cloudy days, outdoor light is 10–100× brighter than indoor\n→ This is the most powerful circadian signal your body has"
+  },
+  {
+    id: "ss3",
+    title: "Exercise Early (You Already Have This!)",
+    desc: "Your 6 AM gym plan actually accelerates the reset. Morning exercise shifts circadian rhythm earlier and improves sleep quality.",
+    detail: "→ Gym at 6 AM = circadian reset + sleep pressure build-up\n→ Even a 20-min walk counts on low-energy days\n→ Avoid intense evening exercise during the reset period\n→ Your protocol is already built for this"
+  },
+  {
+    id: "ss4",
+    title: "No Caffeine After 1 PM",
+    desc: "Caffeine has a 6–8 hour half-life. Coffee at 3 PM = half active at 9–11 PM. This directly delays your sleep onset.",
+    detail: "→ Coffee and black tea: morning only\n→ Green tea also has caffeine — limit after noon\n→ No pre-workout supplements in the evening\n→ This one rule alone can shift sleep by 1–2 hours"
+  },
+  {
+    id: "ss5",
+    title: "Control Evening Light After 9 PM",
+    desc: "Artificial blue light suppresses melatonin production. This is the #1 cause of modern sleep delay.",
+    detail: "→ Dim all house lights after 9 PM\n→ Enable Night Mode / warm display on phone\n→ Avoid bright laptop screens if possible\n→ Candles or lamp light is ideal\n→ Blue light blocking glasses can help if you must use screens"
+  },
+  {
+    id: "ss6",
+    title: "Wind-Down Routine at 9:30 PM",
+    desc: "Signal your brain that sleep is approaching. This is non-negotiable during the reset period.",
+    detail: "→ 9:30 PM: Light stretching (5–10 min)\n→ Warm shower — the temperature drop afterward promotes sleep\n→ Reading (physical book or e-ink, not phone)\n→ Calm music or nothing\n→ Keep the same wind-down cue every night — your brain learns it"
+  },
+  {
+    id: "ss7",
+    title: "If You Can't Sleep — Get Up",
+    desc: "Don't lie in bed frustrated. After 20 minutes of lying awake, get up. This prevents your brain associating bed with wakefulness.",
+    detail: "→ Don't check the time repeatedly\n→ Get up, go to another dim room\n→ Read something calm — nothing stimulating\n→ No phone, no email\n→ Return only when you feel genuinely sleepy\n→ This is called Stimulus Control Therapy and it works"
+  },
+  {
+    id: "ss8",
+    title: "Optional: Magnesium Glycinate",
+    desc: "Magnesium helps muscle relaxation and nervous system calm. It can meaningfully improve sleep quality during the reset.",
+    detail: "→ Dose: 200–400 mg Magnesium Glycinate\n→ Take 30–60 minutes before bed\n→ Glycinate form is best absorbed with fewest side effects\n→ Not a sleeping pill — it supports natural relaxation\n→ Available at most pharmacies and online"
+  },
+];
+
+// ===== SLEEP RESET LOGIC =====
+
+function toggleSleepReset() {
+  if (appState.sleepResetActive) {
+    exitSleepReset();
+  } else {
+    activateSleepReset();
+  }
+}
+
+function activateSleepReset() {
+  appState.sleepResetActive = true;
+  appState.sleepResetStartDate = todayStr();
+  appState.sleepResetDay = 0;
+  appState.sleepResetReason = null;
+  appState.sleepStepChecks = appState.sleepStepChecks || {};
+  appState.sleepLogs = appState.sleepLogs || [];
+  saveState();
+  renderSleepReset();
+  renderSleepBanner();
+  updateStreakDisplay();
+}
+
+function exitSleepReset() {
+  appState.sleepResetActive = false;
+  appState.sleepResetDay = 0;
+  saveState();
+  renderSleepReset();
+  renderSleepBanner();
+  updateStreakDisplay();
+}
+
+function setResetReason(reason) {
+  appState.sleepResetReason = reason;
+  document.querySelectorAll('[id^="reason-"]').forEach(b => b.classList.remove('active'));
+  document.getElementById('reason-' + reason).classList.add('active');
+  saveState();
+  renderSleepBanner();
+}
+
+function advanceResetDay(dayNum) {
+  appState.sleepResetDay = Math.max(appState.sleepResetDay || 0, dayNum);
+  saveState();
+  renderSleepReset();
+  renderSleepBanner();
+}
+
+function toggleSleepStep(stepId) {
+  const key = `${appState.sleepResetStartDate || todayStr()}_${stepId}`;
+  appState.sleepStepChecks = appState.sleepStepChecks || {};
+  appState.sleepStepChecks[key] = !appState.sleepStepChecks[key];
+  saveState();
+  renderSleepSteps();
+}
+
+function toggleStepExpand(idx) {
+  const card = document.getElementById(`sleepStepCard_${idx}`);
+  if (card) card.classList.toggle('expanded');
+}
+
+function logSleepEntry() {
+  const sleepT = document.getElementById('sleepTimeInput').value;
+  const wakeT = document.getElementById('wakeTimeInput').value;
+  if (!sleepT || !wakeT) return;
+  appState.sleepLogs = appState.sleepLogs || [];
+  appState.sleepLogs.push({ date: todayStr(), sleep: sleepT, wake: wakeT });
+  // Auto-advance reset day
+  const currentDay = appState.sleepResetDay || 0;
+  if (currentDay < 4) appState.sleepResetDay = currentDay + 1;
+  saveState();
+  renderSleepReset();
+  renderSleepBanner();
+}
+
+function renderSleepBanner() {
+  const banner = document.getElementById('sleepResetBanner');
+  const indicator = document.getElementById('sleepModeIndicator');
+  const triggerBtn = document.getElementById('sleepTriggerBtn');
+  const btnIcon = document.getElementById('sleepBtnIcon');
+  const btnText = document.getElementById('sleepBtnText');
+  const reasonRow = document.getElementById('sleepReasonRow');
+  const resetDayCount = document.getElementById('sleepResetDayCount');
+  const statusDesc = document.getElementById('sleepStatusDesc');
+  const sleepDayNum = document.getElementById('resetDayNum');
+
+  if (appState.sleepResetActive) {
+    banner.classList.add('visible');
+    indicator.classList.add('visible');
+    triggerBtn.classList.add('active-mode');
+    btnIcon.textContent = '✓';
+    btnText.textContent = 'Sleep Fixed — Exit Reset';
+    reasonRow.style.display = 'none';
+    resetDayCount.style.display = 'block';
+    const d = (appState.sleepResetDay || 0) + 1;
+    sleepDayNum.textContent = Math.min(d, 4);
+    statusDesc.textContent = `Reset in progress (Day ${Math.min(d,4)} of 4). Follow the 8 steps daily. Your fitness streak is paused and protected.`;
+
+    // Render day pills in banner
+    const pills = document.getElementById('srbDayPills');
+    pills.innerHTML = '';
+    const dayLabels = ['Tonight','Day 1','Day 2','Day 3','Day 4 ✓'];
+    dayLabels.forEach((label, i) => {
+      const pill = document.createElement('div');
+      const current = appState.sleepResetDay || 0;
+      pill.className = `srb-day-pill${i === current ? ' active' : ''}${i < current ? ' done' : ''}`;
+      pill.textContent = label;
+      if (i <= current + 1 && i > current) {
+        pill.onclick = () => advanceResetDay(i);
+        pill.title = 'Mark this day done';
+      }
+      pills.appendChild(pill);
+    });
+
+    const reasonLabels = { travel: '✈️ Travel', work: '💼 Urgent Work', social: '🎉 Social', other: '💤 Other' };
+    if (appState.sleepResetReason) {
+      document.getElementById('srbSubText').textContent =
+        `Reason: ${reasonLabels[appState.sleepResetReason]} · Follow the 8-step circadian protocol · Streak is paused, not broken.`;
+    }
+
+  } else {
+    banner.classList.remove('visible');
+    indicator.classList.remove('visible');
+    triggerBtn.classList.remove('active-mode');
+    btnIcon.textContent = '⚠️';
+    btnText.textContent = 'My Sleep Pattern Broke';
+    reasonRow.style.display = 'flex';
+    resetDayCount.style.display = 'none';
+    statusDesc.textContent = `Your sleep pattern is fine. If your schedule breaks due to travel, late nights, or unexpected events — activate reset mode below. Your fitness streak will be protected while you fix your sleep.`;
+  }
+}
+
+function renderSleepSteps() {
+  const container = document.getElementById('sleepStepsList');
+  if (!container) return;
+  container.innerHTML = '';
+  const dateKey = appState.sleepResetStartDate || todayStr();
+
+  SLEEP_STEPS.forEach((step, idx) => {
+    const key = `${dateKey}_${step.id}`;
+    const done = !!(appState.sleepStepChecks && appState.sleepStepChecks[key]);
+
+    const card = document.createElement('div');
+    card.className = `sleep-step-card${done ? ' step-done' : ''}`;
+    card.id = `sleepStepCard_${idx}`;
+
+    card.innerHTML = `
+      <div class="step-number">${idx + 1}</div>
+      <div class="step-content" onclick="toggleStepExpand(${idx})">
+        <div class="step-title">${step.title}</div>
+        <div class="step-desc">${step.desc}</div>
+        <div class="step-detail">${step.detail.split('\n').join('<br>')}</div>
+      </div>
+      <div class="step-check" onclick="toggleSleepStep('${step.id}')">
+        ${done ? '<svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>' : ''}
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function renderResetTimeline() {
+  const statuses = ['rdStatus0','rdStatus1','rdStatus2','rdStatus3','rdStatus4'];
+  const labels = ['Tonight','Day 1','Day 2','Day 3','Done ✓'];
+  const currentDay = appState.sleepResetDay || 0;
+
+  statuses.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (!appState.sleepResetActive) {
+      el.className = 'rdr-status pending';
+      el.textContent = '—';
+    } else if (i < currentDay) {
+      el.className = 'rdr-status done';
+      el.textContent = '✓ Done';
+    } else if (i === currentDay) {
+      el.className = 'rdr-status today';
+      el.textContent = '← Today';
+    } else {
+      el.className = 'rdr-status pending';
+      el.textContent = 'Upcoming';
+    }
+  });
+}
+
+function renderSleepLogHistory() {
+  const container = document.getElementById('sleepLogHistory');
+  if (!container) return;
+  const logs = (appState.sleepLogs || []).slice(-4).reverse();
+  if (logs.length === 0) {
+    container.innerHTML = '<div style="font-size:0.75rem;color:var(--muted);font-family:Space Mono,monospace;">No entries yet.</div>';
+    return;
+  }
+  container.innerHTML = logs.map(log => `
+    <div style="display:flex;gap:1.5rem;padding:0.4rem 0;font-family:'Space Mono',monospace;font-size:0.68rem;color:var(--muted);border-bottom:1px solid var(--border);">
+      <span>${log.date}</span>
+      <span>💤 Slept: <span style="color:#c4b5fd">${log.sleep}</span></span>
+      <span>🌅 Woke: <span style="color:#c4b5fd">${log.wake}</span></span>
+    </div>
+  `).join('');
+}
+
+function renderSleepReset() {
+  renderSleepBanner();
+  renderSleepSteps();
+  renderResetTimeline();
+
+  const logSection = document.getElementById('sleepLogSection');
+  const reasonRow = document.getElementById('sleepReasonRow');
+  if (logSection) logSection.style.display = appState.sleepResetActive ? 'block' : 'none';
+  if (reasonRow) reasonRow.style.display = appState.sleepResetActive ? 'none' : 'flex';
+  renderSleepLogHistory();
+
+  // Restore reason buttons
+  if (appState.sleepResetReason) {
+    document.querySelectorAll('[id^="reason-"]').forEach(b => b.classList.remove('active'));
+    const rb = document.getElementById('reason-' + appState.sleepResetReason);
+    if (rb) rb.classList.add('active');
+  }
+}
+
+function updateStreakDisplay() {
+  // Streak is paused (not broken) during sleep reset
+  const streakEl1 = document.getElementById('streakCount');
+  const streakEl2 = document.getElementById('statStreak');
+  if (appState.sleepResetActive) {
+    const pausedLabel = `${appState.streak} ⏸`;
+    if (streakEl1) streakEl1.textContent = pausedLabel;
+    if (streakEl2) streakEl2.textContent = `${appState.streak} ⏸`;
+  } else {
+    if (streakEl1) streakEl1.textContent = appState.streak;
+    if (streakEl2) streakEl2.textContent = appState.streak;
+  }
+}
+
+// ===== INIT =====
+
+async function init() {
+  await openDB();
+  await loadState();
+
+  // Ensure sleep state fields exist
+  appState.sleepResetActive = appState.sleepResetActive || false;
+  appState.sleepResetDay = appState.sleepResetDay || 0;
+  appState.sleepStepChecks = appState.sleepStepChecks || {};
+  appState.sleepLogs = appState.sleepLogs || {};
+
+  // Auto-select today
+  const todayDayIdx = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
+  selectedDay = todayDayIdx;
+
+  updateDateDisplay();
+  renderDaySelector();
+  renderTimeline();
+  renderSleepBanner();
+  updateStreakDisplay();
+
+  // Auto-refresh every minute for active-now highlight
+  setInterval(() => { renderTimeline(); }, 60000);
+}
+
+init();
+</script>
+</body>
+</html>

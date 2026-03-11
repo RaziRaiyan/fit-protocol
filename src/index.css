@@ -1007,12 +1007,155 @@ body {
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-/* RESPONSIVE */
-@media (max-width: 600px) {
-  .container { padding: 1rem; }
-  .timeline::before { left: 4.5rem; }
-  .time-block { grid-template-columns: 4rem 1.5rem 1fr; }
+/* ===== RESPONSIVE ===== */
+
+/* Tablet */
+@media (max-width: 768px) {
+  .tracker-grid { grid-template-columns: 1fr; }
+  .meal-plan-grid { grid-template-columns: 1fr; }
   .stats-row { grid-template-columns: repeat(2, 1fr); }
+
+  .grocery-cols {
+    grid-template-columns: 1fr !important;
+  }
+
+  .reset-day-row {
+    grid-template-columns: 5rem 1fr auto;
+    gap: 0.6rem;
+  }
+
+  .sleep-log-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+
+  .sleep-time-input { width: 100%; }
+  .sleep-log-btn { width: 100%; text-align: center; }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  /* Layout */
+  .container { padding: 1rem; }
+
+  /* Header */
+  .header {
+    height: auto;
+    padding: 0.7rem 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .logo { font-size: 1.4rem; }
+  .header-right {
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .date-display { display: none; }
+  .streak-badge { padding: 0.3rem 0.6rem; }
+  .streak-count { font-size: 0.9rem; }
+
+  /* Sleep reset header badge */
+  .sleep-reset-header-badge {
+    padding: 0.3rem 0.6rem !important;
+  }
+  .sleep-reset-header-badge span:first-child {
+    font-size: 0.85rem !important;
+  }
+
+  /* Sleep reset banner */
+  .sleep-reset-banner {
+    flex-wrap: wrap;
+    padding: 0.8rem 1rem;
+    gap: 0.8rem;
+  }
+  .srb-text { min-width: 0; width: 100%; }
+  .srb-day-pills { width: 100%; }
+  .srb-exit-btn { width: 100%; text-align: center; }
+
+  /* Tabs */
+  .tabs { padding: 0 0.5rem; }
+  .tab { padding: 0.75rem 0.85rem; font-size: 0.65rem; }
+
+  /* Timeline */
+  .timeline::before { left: 4rem; }
+  .time-block { grid-template-columns: 3.5rem 1.2rem 1fr; gap: 0 0.6rem; }
+  .time-label { font-size: 0.6rem; padding-top: 1rem; }
+  .block-card { padding: 0.75rem 0.9rem; }
+  .block-title { font-size: 0.8rem; }
+  .block-desc { font-size: 0.72rem; }
+  .block-tag { font-size: 0.55rem; }
+
+  /* Stats */
+  .stats-row { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
+  .stat-value { font-size: 1.6rem; }
+
+  /* Section titles */
+  .section-title { font-size: 1.6rem; }
+
+  /* Day selector */
+  .day-btn { padding: 0.4rem 0.7rem; font-size: 0.62rem; }
+
+  /* Progress bar */
+  .day-progress { padding: 0.9rem 1rem; gap: 1rem; }
+
+  /* Meal plan */
+  .meal-plan-grid { grid-template-columns: 1fr; }
+  .day-total-bar {
+    gap: 1rem;
+    padding: 0.9rem 1rem;
+    justify-content: space-between;
+  }
+  .total-val { font-size: 1.2rem; }
+
+  /* Workout */
+  .wp-day-title { font-size: 1.2rem; flex-wrap: wrap; }
+  .workout-days { gap: 0.5rem; }
+  .wd-circle { width: 34px; height: 34px; font-size: 0.55rem; }
+
+  /* Tracker */
+  .tracker-grid { grid-template-columns: 1fr; }
+  .tracker-card { padding: 1rem; }
+
+  /* Grocery */
+  .grocery-cols { grid-template-columns: 1fr !important; }
+
+  /* Sleep reset tab */
+  .reset-day-row {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+  .rdr-label { font-size: 0.65rem; }
+  .rdr-status { justify-self: start; }
+
+  .sleep-log-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+  .sleep-time-input { width: 100%; }
+  .sleep-log-btn { width: 100%; text-align: center; padding: 0.55rem; }
+
+  .sleep-step-card { padding: 1rem 1rem; gap: 0.8rem; }
+  .step-number { font-size: 1.4rem; width: 1.6rem; }
+  .step-title { font-size: 0.82rem; }
+  .step-desc { font-size: 0.73rem; }
+
+  .workout-plan-day { padding: 1rem; }
+  .exercise-row { padding: 0.5rem 0.6rem; font-size: 0.78rem; }
+  .ex-sets { font-size: 0.62rem; }
+
+  /* Reset timeline card */
+  .reset-timeline { padding: 1rem; }
+}
+
+/* Small phones */
+@media (max-width: 400px) {
+  .header-right { gap: 0.5rem; }
+  .streak-badge { font-size: 0.65rem; }
+  .tab { padding: 0.7rem 0.7rem; font-size: 0.6rem; letter-spacing: 0.04em; }
+  .time-block { grid-template-columns: 3rem 1rem 1fr; gap: 0 0.5rem; }
+  .timeline::before { left: 3.5rem; }
 }
 
 .tag-rest {

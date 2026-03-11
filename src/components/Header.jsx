@@ -23,7 +23,7 @@ export default function Header({ appState }) {
       </div>
       <div className="header-right">
         {appState.sleepResetActive && (
-          <div style={{
+          <div className="sleep-reset-header-badge" style={{
             display: 'flex',
             alignItems: 'center',
             gap: '0.6rem',

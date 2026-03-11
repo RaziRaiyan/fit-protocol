@@ -16,6 +16,7 @@ const INITIAL_STATE = {
   weeklyTasks: {},
   biweeklyTasks: {},
   workoutWeek: {},
+  workoutMode: 'gym',
   groceryChecks: {},
   streak: 0,
   lastStreakDate: null,

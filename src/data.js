@@ -119,42 +119,124 @@ export const MEAL_PLAN = [
   },
 ];
 
-export const WORKOUT_PLAN = [
-  { day: "Day 1", focus: "Chest + Triceps", exercises: [
-    { name: "Bench Press", sets: "4 × 6–8 reps" },
-    { name: "Incline Dumbbell Press", sets: "4 × 8–10 reps" },
-    { name: "Cable / Dumbbell Fly", sets: "3 × 12 reps" },
-    { name: "Dips", sets: "3 × failure" },
-    { name: "Tricep Pushdown", sets: "3 × 12 reps" },
-  ]},
-  { day: "Day 2", focus: "Back + Biceps", exercises: [
-    { name: "Pull-ups", sets: "4 × failure" },
-    { name: "Barbell / Dumbbell Row", sets: "4 × 6–8 reps" },
-    { name: "Lat Pulldown", sets: "3 × 10 reps" },
-    { name: "Face Pull", sets: "3 × 15 reps" },
-    { name: "Bicep Curl", sets: "3 × 12 reps" },
-  ]},
-  { day: "Day 3", focus: "Legs", exercises: [
-    { name: "Squat", sets: "5 × 5 reps" },
-    { name: "Romanian Deadlift", sets: "4 × 8 reps" },
-    { name: "Leg Press", sets: "3 × 12 reps" },
-    { name: "Walking Lunges", sets: "3 × 12 each leg" },
-    { name: "Calf Raises", sets: "4 × 15 reps" },
-  ]},
-  { day: "Day 4", focus: "Shoulders", exercises: [
-    { name: "Overhead Press", sets: "4 × 6–8 reps" },
-    { name: "Lateral Raise", sets: "4 × 15 reps" },
-    { name: "Rear Delt Fly", sets: "3 × 15 reps" },
-    { name: "Dumbbell Shrugs", sets: "3 × 12 reps" },
-  ]},
-  { day: "Day 5", focus: "Full Body + Core", exercises: [
-    { name: "Deadlift", sets: "5 × 5 reps" },
-    { name: "Pull-ups", sets: "3 × failure" },
-    { name: "Pushups", sets: "3 × failure" },
-    { name: "Hanging Leg Raises", sets: "3 × 12 reps" },
-    { name: "Plank", sets: "3 × 60 seconds" },
-  ]},
-];
+export const WORKOUT_PLANS = {
+  gym: [
+    { day: "Day 1", focus: "Chest + Triceps", exercises: [
+      { name: "Bench Press", sets: "4 × 6–8 reps" },
+      { name: "Incline Dumbbell Press", sets: "4 × 8–10 reps" },
+      { name: "Cable / Dumbbell Fly", sets: "3 × 12 reps" },
+      { name: "Dips", sets: "3 × failure" },
+      { name: "Tricep Pushdown", sets: "3 × 12 reps" },
+    ]},
+    { day: "Day 2", focus: "Back + Biceps", exercises: [
+      { name: "Pull-ups", sets: "4 × failure" },
+      { name: "Barbell / Dumbbell Row", sets: "4 × 6–8 reps" },
+      { name: "Lat Pulldown", sets: "3 × 10 reps" },
+      { name: "Face Pull", sets: "3 × 15 reps" },
+      { name: "Bicep Curl", sets: "3 × 12 reps" },
+    ]},
+    { day: "Day 3", focus: "Legs", exercises: [
+      { name: "Barbell Squat", sets: "5 × 5 reps" },
+      { name: "Romanian Deadlift", sets: "4 × 8 reps" },
+      { name: "Leg Press", sets: "3 × 12 reps" },
+      { name: "Walking Lunges", sets: "3 × 12 each leg" },
+      { name: "Calf Raises", sets: "4 × 15 reps" },
+    ]},
+    { day: "Day 4", focus: "Shoulders", exercises: [
+      { name: "Barbell Overhead Press", sets: "4 × 6–8 reps" },
+      { name: "Lateral Raise", sets: "4 × 15 reps" },
+      { name: "Rear Delt Fly (Cable/DB)", sets: "3 × 15 reps" },
+      { name: "Dumbbell Shrugs", sets: "3 × 12 reps" },
+      { name: "Face Pull", sets: "3 × 15 reps" },
+    ]},
+    { day: "Day 5", focus: "Full Body + Core", exercises: [
+      { name: "Deadlift", sets: "5 × 5 reps" },
+      { name: "Pull-ups", sets: "3 × failure" },
+      { name: "Push-ups", sets: "3 × failure" },
+      { name: "Hanging Leg Raises", sets: "3 × 12 reps" },
+      { name: "Plank", sets: "3 × 60 seconds" },
+    ]},
+  ],
+
+  home: [
+    { day: "Day 1", focus: "Chest + Triceps", exercises: [
+      { name: "Dumbbell Bench Press (flat)", sets: "4 × 8–10 reps" },
+      { name: "Dumbbell Incline Press", sets: "4 × 8–10 reps" },
+      { name: "Dumbbell Chest Fly (flat)", sets: "3 × 12 reps" },
+      { name: "Close-Grip Dumbbell Press", sets: "3 × 10 reps" },
+      { name: "Dumbbell Overhead Tricep Extension", sets: "3 × 12 reps" },
+    ]},
+    { day: "Day 2", focus: "Back + Biceps", exercises: [
+      { name: "Single-Arm Dumbbell Row", sets: "4 × 8–10 each side" },
+      { name: "Dumbbell Bent-Over Row", sets: "4 × 10 reps" },
+      { name: "Dumbbell Pullover (on bench)", sets: "3 × 12 reps" },
+      { name: "Dumbbell Hammer Curl", sets: "3 × 12 reps" },
+      { name: "Dumbbell Bicep Curl", sets: "3 × 12 reps" },
+    ]},
+    { day: "Day 3", focus: "Legs", exercises: [
+      { name: "Dumbbell Goblet Squat", sets: "4 × 12 reps" },
+      { name: "Dumbbell Romanian Deadlift", sets: "4 × 10 reps" },
+      { name: "Bulgarian Split Squat (bench)", sets: "3 × 10 each leg" },
+      { name: "Dumbbell Walking Lunges", sets: "3 × 12 each leg" },
+      { name: "Dumbbell Calf Raise (standing)", sets: "4 × 15 reps" },
+    ]},
+    { day: "Day 4", focus: "Shoulders", exercises: [
+      { name: "Dumbbell Seated Overhead Press", sets: "4 × 8–10 reps" },
+      { name: "Dumbbell Lateral Raise", sets: "4 × 15 reps" },
+      { name: "Bent-Over Rear Delt Fly", sets: "3 × 15 reps" },
+      { name: "Dumbbell Front Raise", sets: "3 × 12 reps" },
+      { name: "Dumbbell Shrugs", sets: "3 × 12 reps" },
+    ]},
+    { day: "Day 5", focus: "Full Body + Core", exercises: [
+      { name: "Dumbbell Deadlift", sets: "4 × 8 reps" },
+      { name: "Dumbbell Renegade Row", sets: "3 × 8 each side" },
+      { name: "Dumbbell Thruster (Squat to Press)", sets: "3 × 10 reps" },
+      { name: "Dumbbell Russian Twist", sets: "3 × 15 reps" },
+      { name: "Plank", sets: "3 × 60 seconds" },
+    ]},
+  ],
+
+  bodyweight: [
+    { day: "Day 1", focus: "Chest + Triceps", exercises: [
+      { name: "Push-ups", sets: "4 × failure" },
+      { name: "Wide-Grip Push-ups", sets: "3 × 15 reps" },
+      { name: "Diamond Push-ups", sets: "3 × 12 reps" },
+      { name: "Decline Push-ups (feet on chair)", sets: "3 × 12 reps" },
+      { name: "Tricep Dips (on chair)", sets: "3 × failure" },
+    ]},
+    { day: "Day 2", focus: "Back + Biceps", exercises: [
+      { name: "Pull-ups", sets: "4 × failure" },
+      { name: "Inverted Row (under sturdy table)", sets: "4 × 12 reps" },
+      { name: "Superman Hold", sets: "3 × 15 reps" },
+      { name: "Chin-ups / Negative Chin-ups", sets: "3 × failure" },
+      { name: "Doorframe / Towel Bicep Row", sets: "3 × 12 reps" },
+    ]},
+    { day: "Day 3", focus: "Legs", exercises: [
+      { name: "Bodyweight Squat", sets: "4 × 20 reps" },
+      { name: "Jump Squat", sets: "3 × 15 reps" },
+      { name: "Bulgarian Split Squat (chair)", sets: "3 × 12 each leg" },
+      { name: "Walking Lunges", sets: "3 × 15 each leg" },
+      { name: "Standing Calf Raises", sets: "4 × 25 reps" },
+    ]},
+    { day: "Day 4", focus: "Shoulders", exercises: [
+      { name: "Pike Push-ups", sets: "4 × 12 reps" },
+      { name: "Wall Handstand Hold", sets: "3 × 30 seconds" },
+      { name: "Decline Push-ups", sets: "3 × 15 reps" },
+      { name: "Prone Y-T-W Raises (on floor)", sets: "3 × 12 reps" },
+      { name: "Arm Circles + Shoulder Dislocates (towel)", sets: "3 × 20 reps" },
+    ]},
+    { day: "Day 5", focus: "Full Body + Core", exercises: [
+      { name: "Burpees", sets: "4 × 10 reps" },
+      { name: "Push-up to Side Plank", sets: "3 × 8 each side" },
+      { name: "Jump Lunges", sets: "3 × 12 each leg" },
+      { name: "V-Ups", sets: "3 × 15 reps" },
+      { name: "Plank", sets: "3 × 60 seconds" },
+    ]},
+  ],
+};
+
+// backwards compat
+export const WORKOUT_PLAN = WORKOUT_PLANS.gym;
 
 export const WEEKLY_TASKS = [
   { id: "wt1", name: "Sunday Grocery Shopping", desc: "Buy all items from the grocery list" },
